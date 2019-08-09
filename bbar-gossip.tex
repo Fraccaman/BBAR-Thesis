@@ -1,0 +1,128 @@
+\documentclass[mscthesis]{usiinfthesis}
+\usepackage{lipsum}
+
+
+\usepackage{listings}
+
+\lstdefinelanguage{algebra}
+{morekeywords={import,sort,constructors,observers,transformers,axioms,if,
+else,end},
+sensitive=false,
+morecomment=[l]{//s},
+}
+
+
+
+\title{Blochchain BAR Gossip} %compulsory
+\specialization{Dependable Distributed Systems}%optional
+\subtitle{Reliable and clustered gossiping protocol} %optional 
+\author{Gianmarco Fraccaroli} %compulsory
+\begin{committee}
+\advisor{Prof.}{Fernando}{Pedone} %compulsory
+% \coadvisor{Prof.}{Student's}{Co-Advisor}{} %optional
+\end{committee}
+\Day{Yesterday} %compulsory
+\Month{September} %compulsory
+\Year{2019} %compulsory, put only the year
+\place{Lugano} %compulsory
+
+\dedication{To my beloved} %optional
+\openepigraph{Someone said \dots}{Someone} %optional
+
+%\makeindex %optional, also comment out \theindex at the end
+
+\begin{document}
+
+\maketitle %generates the titlepage, this is FIXED
+
+\frontmatter %generates the frontmatter, this is FIXED
+
+\begin{abstract}
+This is a very abstract abstract. 
+
+\lipsum
+\end{abstract}
+
+% \begin{abstract}[Zusammenfassung]
+% optional, use only if your external advisor requires it in his/er
+%l anguage 
+% \\
+
+%\lipsum
+%\end{abstract}
+
+\begin{acknowledgements}
+\lipsum 
+\end{acknowledgements}
+
+\tableofcontents 
+\listoffigures %optional
+\listoftables %optional
+
+\mainmatter
+
+\chapter{Introduction}
+\section{Motivation}
+\section{Scope}
+\section{Related work}
+\section{Structure of the thesis}
+
+\chapter{Background}
+\section{Blockchain and Gossip}
+\section{Type of gossip}
+\section{Gossip threats}
+\section{BAR model}
+
+\chapter{BBAR Gossip}
+\section{Model assumptions}
+\section{Type of peers}
+\section{Protocol description}
+\subsection{Network join}
+\subsection{Peer selection}
+\subsection{Data exchange}
+\section{Details}
+
+\chapter{Evaluation}
+\section{BBAR vs BAR}
+\section{Simulation vs Prototype}
+
+\chapter{Experiments}
+\section{Setup}
+\section{Convergences rate}
+\section{Duplicates}
+\section{Edge cases}
+
+\chapter{Conclusions}
+\section{Discussion}
+\section{Future works}
+
+
+%\chapter[Short title]{A chapter title which will run over two lines --- it's for
+%  testing purpose}
+%
+%\lipsum[1-2]
+%
+%\section{The first section}
+%\lipsum[3-4]
+%
+%\appendix %optional, use only if you have an appendix
+%
+%\chapter{Some retarded material}
+%\section{It's over\dots}
+%\lipsum 
+%
+%\backmatter
+%
+%\chapter{Glossary} %optional
+
+%\bibliographystyle{alpha}
+%\bibliographystyle{dcu}
+\bibliographystyle{plainnat}
+\bibliography{biblio}
+
+%\cleardoublepage
+%\theindex %optional, use only if you have an index, must use
+	  %\makeindex in the preamble
+\lipsum
+
+\end{document}
