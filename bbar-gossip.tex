@@ -62,9 +62,28 @@ This is a very abstract abstract.
 \mainmatter
 
 \chapter{Introduction}
+During the last ten years, after the born of Bitcoin, blockchain-based systems became an important building block in several applications, ranging from financial to legal services. As the need for this kind of distributed structured grew, more advanced and sophisticated versions have been built to meet real-world throughput demands. \\
+In fact, as the current Bitcoin protocol can handle only seven transactions per second, other protocols like Tendermint or Hyperledger can handle volumes of operations in the order of thousands per second. \\
+This is because the latter systems differ in the consensus mechanism, allowing for better performance and higher scalability at the cost of less decentralization. \\
+One of the aspects which is typical for most of those systems is the fact that they exchange information through a gossip protocol. Most of the time, this network can be freely joined by anyone, meaning that everyone receives and share updates on the state with other peers. 
+As receiving updates reliably and quickly is a key aspect for these kinds of protocols, the P2P network is a crucial aspect as it offers many advantages and disadvantages. \\
+Building a faster, safer, and more reliable gossip protocol for blockchains would improve the overall of those systems, making them closer to real-world scenarios needs.
+
+
 \section{Motivation}
+Blockchain systems offer an alternative way to settle an operation between two parties without having to rely on a trusted third party. The most famous and common example is the use of Bitcoin as a method of payments without having to rely on a bank or any other financial service.
+This is particularly useful because it is possible to decrease the costs associated with the service offered by the mediator and acquire a higher level of trust as the operations can be carried on just by the two (or more) persons involved in the exchange. 
+As we said before, due to the decentralized nature of these systems, gossip protocols, also called P2P, are heavily employed since they offer a high degree of scalability, fault-tolerance, robustness, fast-spreading and resilience, proprieties which are a perfect match for a decentralized system.
+Still, these protocols have their disadvantages. First of all, as anyone can join the network without any sort of registration, it is hard to account for their behaviour and punish it. Being not able to punish peers for their incorrect behaviour is even worse in cases where this is done on purpose leading to Sybil or Eclipse attacks (which are going to be discussed later on).
+So, due to the crucial role of the gossip protocol in a blockchain system, we need to be able to ensure its correctness even in the presence of malicious peers.
+
 \section{Scope}
+Gossip protocols used in blockchain-context don't usually take into consideration malicious peer, or if they do, they generally use easy and simplistic countermeasures.
+This thesis aims to find a way to account peers for their behaviour, punishing those who either try to gain more benefits at the expense
+of other peers or try to slow or even disrupt the system. Moreover, it is needed to take into consideration that convergence rate is an essential factor and a slow protocol would degrade the performance of the entire system.
+
 \section{Related work}
+
 \section{Structure of the thesis}
 
 \chapter{Background}
