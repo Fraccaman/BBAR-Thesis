@@ -78,7 +78,7 @@
 %%% execution of options
 \ExecuteOptions{hyper}
 \ProcessOptions \relax
-\typeout{*** Please report bugs, comments, suggestions, and improvements
+\typeout{*** Please rweport bugs, comments, suggestions, and improvements
   to: }
 \typeout{*** Domenico Bianculli <domenico.bianculli@usi.ch>}
 \typeout{*** Jochen Wuttke <wuttkej@usi.ch>}
