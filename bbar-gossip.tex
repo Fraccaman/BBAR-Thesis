@@ -14,12 +14,12 @@ morecomment=[l]{//s},
 
 
 \title{Blochchain BAR Gossip} %compulsory
-\specialization{Dependable Distributed Systems}%optional
+\specialization{Finantial Technology and Computing}%optional
 \subtitle{Reliable and clustered gossiping protocol} %optional 
 \author{Gianmarco Fraccaroli} %compulsory
 \begin{committee}
 \advisor{Prof.}{Fernando}{Pedone} %compulsory
-% \coadvisor{Prof.}{Student's}{Co-Advisor}{} %optional
+
 \end{committee}
 \Day{Yesterday} %compulsory
 \Month{September} %compulsory
@@ -43,7 +43,7 @@ This is a very abstract abstract.
 
 % \begin{abstract}[Zusammenfassung]
 % optional, use only if your external advisor requires it in his/er
-%l anguage 
+%language 
 % \\
 
 %\lipsum
@@ -53,7 +53,7 @@ This is a very abstract abstract.
 \end{acknowledgements}
 
 \tableofcontents 
-\listoffigures %optional
+\listoffigures 
 \listoftables %optional
 
 \mainmatter
@@ -314,9 +314,20 @@ When the next epoch start, every peer in the network has to send back their toke
 
 
 \subsection{Peer selection phase}
+As soon a the registration phase is over, a peer should have received a valid token from the TOKEN message and a list of peers he can contact from the VIEW message. \\
+Instead of randomly selecting a peer in the peer list, the selection is computed using a PNRG seeded with the token received. The output of the PNRG modulus the size of the peer list will generate the index of the selected partner. \\ 
+Using this mechanism, we can make peers accountable for peer-selection and create PoMs in case of misbehavior. 
 \subsection{Message exchange phase}
 \section{Details}
+\subsection{Shuffle peer list each epoch}
+\subsection{Multiple BN registration per peer}
+\subsection{Entry nodes selection}
+\subsection{Timeout during exchange phases}
+\subsection{PoM rewards}
+\subsection{Faster consensus}
 \section{Optimizations}
+\subsection{History exchange}
+\subsection{Message header}
 
 \chapter{Evaluation}
 \section{BBAR vs BAR}
@@ -326,6 +337,7 @@ When the next epoch start, every peer in the network has to send back their toke
 \section{Setup}
 \section{Convergences rate}
 \section{Duplicates}
+\section{Exchange types}
 \section{Edge cases}
 
 \chapter{Conclusions}
