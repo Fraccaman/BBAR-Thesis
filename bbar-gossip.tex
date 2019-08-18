@@ -39,8 +39,6 @@ morecomment=[l]{//s},
 
 \begin{abstract}
 This is a very abstract abstract. 
-
-\lipsum
 \end{abstract}
 
 % \begin{abstract}[Zusammenfassung]
@@ -52,7 +50,6 @@ This is a very abstract abstract.
 %\end{abstract}
 
 \begin{acknowledgements}
-\lipsum 
 \end{acknowledgements}
 
 \tableofcontents 
@@ -140,17 +137,78 @@ One example of such strategy is the eager push and pull, which is characterized 
 Gossip protocols are also characterized by how they manage the membership of the network, as each peer can maintain a full-view or a partial-view of the network and structure of the network, as peers can be organized in tree or circle based shape. % TODO: EXPAND
 
 \subsection{Gossip threats}
-
+Peer in a blockchain network does not usually need to be registrered as no PKI infrastructure exists. This fact is perfect to increase the level of decentralization, but it also introduces no way of punishing a misbehaving peer, as he can easily change his identity.
+The most dangerous attacks on this kind of p2p networks are rational attacks, Sybil attack, and Eclipse attacks. \\
+The first one includes all those scenarios where a peer acts selfishly the increasing the load of other more altruistic peers. An example is a peer who always asks for updates without sharing anything, minimizing the use of his resources and maximizing his gain. \\
+A Sybil attack is a kind of security threat where one person tries to take over the network by creating multiple identities. In a blockchain-context, a malicious actor could create a high number of nodes polluting most of the network's view of other peers. This scenario could lead to a bad situation where most fo peer would not be able to receive or transmit information. \\
+Eclipse attacks are a more powerful Sybil attack where an attacker is able to pollute the whole network view of a peer, meaning that the victim cannot understand whether the information he receives is correct or not.
 \subsection{Gossip in blockchains}
+As of 2019, many blockchains were born, each one providing different services, ranging from financial to juridical and gossip protocol. Most of the time, the p2p network is used to propagate messaging containing blocks or transactions, but there are also examples of blockchain which use gossip to disseminate message for consensus purposes.\\
+The most famous and most used blockchain is Bitcoin. In the Bitcoin p2p network, peers maintain a routing table containing the connection information of all the peers they have known about until that time. Every $\Delta$ time $T$, a subset of peers is chosen to start exchange messages using a lazy push-based strategy. Another relevant blockchain is Ethereum, which gossip protocol is pretty similar to Bitcoin's. One relevant fact about Ethereum's p2p protocol is the fact that it has been found vulnerable to an eclipse attack in 2015 and since then a new peer sampling mechanism has been added to remove the issue. \\
+Looking at less decentralized blockchain, we have Hyperledger Fabric which divides gossip into push-based and pull-based times. Another one of this kind is Tendermint, which instead follows an eager push-based strategy. Tendermint exploits also gossip to disseminate consensus messages between validators.
 
-\section{BAR model}
-
+\section{BAR model \& BAR Gossip}
+Traditionally, fault-tolerance theory admits three different models to describe actor's behaviors, determining how much the system can withstand part of it deviating from the protocol. \\
+The first model is the simple fault-tolerance, where the idea is that each actor can either precisely follow the protocol or fail, meaning that the system has to be able to detect and recover from failures. This model is most useful in those scenarios where the system is architecturally decentralized but politically centralized (ex. Google cloud hosting). \\
+However, what if the considered system is managed by several organizations or individuals? In this case, the model has to in exchange for the Byzantine fault-tolerance, which states that most of the nodes will follow the protocol, but some of them will deviate either by acting maliciously or because they crash/fail. Byzantine fault-tolerance systems need to survive against a percentage of such deviating members. \\
+The last, more realistic and complex model extends the notion of Byzantine fault-tolerance, is called Byzantine Altruistic Rational model an differs from the previous one by adding a simple reasoning: considering a real-life scenario, every actor's behavior in a system is determined by the incentives he gets when following the protocol. Most members of the system will always try to maximize their utility function even if this requires to deviate from the protocol. A simple example are push and pull forms of gossip: as peers are obligated to exchange information in a Tic-For-Tac fashion, they can ask for updates and never sharing them, increasing the load burden on a smaller subset of peers. \\
+This is way BAR model assumes three types of actors:
+\begin{itemize}
+	\item Altruistic: actors who always follow the protocol.
+	\item Rationals: actors who follow the protocol if it suits them, and do not follow the protocol if it does not.
+	\item Byzantine: actors who only want to disrupt the system.
+\end{itemize}
+If a system survives under the assumptions of the BAR model, it is said to be incentive-compatible. \\
+Looking at the literature, several gossip protocol, assuming the BAR model, have already been studied. One of the most famous is the work done in \{ cite here BAR Gossip\}, which developed the first data streaming application with predictable throughput and low latency. \\
+ In BAR Gossip a central tracker distributes updates to a subset of peers, who will then disseminate them with other members of the network in such a way that every peer's action is accountable and provable. As to our knowledge, there is no work on gossip protocols assuming a BAR model in a blockchain-context.
+\section{BAR Gossip in details}
+Is it worth to explain how BAR Gossip works? Maybe it can lead to easier explanation later.
 \section{Problem definition}
+Is it worth adding this section to explain which are the problem and challenges of implementing BAR Gossip in a blockchain context?
+
 
 \chapter{BBAR Gossip}
+After having discussed the needed background, we can now move onto describing our BBAR Gossip protocol.\\
+ It is important to remember that the primary goal of the protocol is to implement a more reliable p2p network able to withstand or minimize the attack surfaces introduced by p2p protocols. This goal must be persuaded, taking into account that decentralization and convergence rate is a crucial factor in a blockchain network, meaning it could severely impact overall performances.\\
+This chapter will start describing the model assumption. It will then move to describe the several kinds of peers included in the network and their relationship. The last three sections will outline the actual protocol with a focus on implementation details and further optimizations.
 \section{Model assumptions}
+We are making the following assumption about our model:
+\begin{itemize}
+	\item The p2p network is not built upon any structure.
+	\item Every peer in the network adheres to the BAR model.
+	\item There exist two kinds of peers: validator and full node.
+	\item Validators are block producers and can get punished for misbehaving.
+	\item Validators do not know each other. If they need to talk, they do it by gossiping.
+	\item Validators are also full nodes and are not recognizable by other peers.
+	\item Identities of Validators are known and bound to a Public Key, but their network address is hidden and unknown.
+	\item Full nodes keep track of network operations and can generate Proof-of-Misbehavior against malicious peers.
+	\item There exist seed-nodes, which a newly joined peer can contact to receive an initial set of peer addresses.
+\end{itemize}
+Our model assumptions are compatible with most blockchain using PoS as consensus mechanism such as Tendermint.
+\section{Cryptographic primitives}
+In order to be able to make peers accountable for their actions, we need several kinds of cryptographic primitives: hash function, symmetric cryptography, asymmetric cryptography, and pseudo-random number generators. \\
+Hash functions are any function which can be used to map arbitrary length data onto fixed size data. Moreover, we need hashing function with two more additional proprieties:
+\begin{itemize}
+	\item Pre-image resistance
+	\item Second-image resistance
+	\item Collision resistance
+\end{itemize}
+The hashing function chosen in our implementation is SHA256, but other good candidates are SHA3 or BLAKE2. \\
+Symmetric encryption is an encryption mechanism that uses the same key to encrypt and decrypt some data. It is composed of an encryption algorithm, a decryption algorithm, the plain-text, the cipher-text, and a secret key. The encryption algorithm takes as parameters the plain-text and secret key and outputs the -cipher-text. The decryption algorithm takes as parameters the cipher-text and secret key and outputs the plain-text. The symmetric encryption algorithm chosen in our implementation is AES256, but Salsa20 or ChaCha are also good candidates. \\
+Asymmetric encryption uses two key, one called private and one public, to either encrypt/decrypt or perform digital signatures. Digital signatures are a mathematical technique to validate the authenticity and integrity of a message and are usually used to acknowledge the consent of the signer.  \\
+Pseudo-random number generators are algorithms that deterministically generates a sequence of numbers whose properties approximate the properties of sequences of random numbers. PRNGs cannot be considered really random as their output is totally determined by an initial value called seed. Our implementation follows the Mersenne Twister PRNG, but the XORShift PNRG family is also a good candidate.
 \section{Type of peers}
+BBAR Gossip introduces two new different node types in the network along with the standard validator, full and seed node. It also modifies the default behaviour of seed node. \\
+The new nodes are called bootstrap and entry nodes. Each node has a particular role in the network. \\
+\begin{itemize}
+	\item Bootstrap nodes are the main difference with traditional gossips. Its primary purpose is to register and keep track of new peers, remove malicious peer, and coordinate the exchange of messages. Each Bootstrap node identity is tied to a corresponding validator's identity as they can be made accountable for their actions and, in case of misbehaviour, be slashed.
+	\item Entry nodes are an additional component of every bootstrap node. They act as reverse proxies to keep the network identity (IP address) of the bootstrap node hidden to avoid DDoS attacks.
+	\item Full nodes are simple peers in the network who want to exchange messages with other peers to sync their state. They have different behaviour as they agree to the BAR model.
+	\item Seeds node keep track of bootstrap node's addresses as new peers need to be able to contact a bootstrap node to start interacting with the network.
+\end{itemize}
+
 \section{Protocol description}
+\
 \subsection{Network join}
 \subsection{Peer selection}
 \subsection{Data exchange}
