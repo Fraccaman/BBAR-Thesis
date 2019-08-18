@@ -1,8 +1,8 @@
 \documentclass[mscthesis]{usiinfthesis}
 \usepackage{lipsum}
-
-
 \usepackage{listings}
+\usepackage{float}
+\usepackage{tabularx}
 
 \lstdefinelanguage{algebra}
 {morekeywords={import,sort,constructors,observers,transformers,axioms,if,
@@ -196,6 +196,7 @@ Hash functions are any function which can be used to map arbitrary length data o
 The hashing function chosen in our implementation is SHA256, but other good candidates are SHA3 or BLAKE2. \\
 Symmetric encryption is an encryption mechanism that uses the same key to encrypt and decrypt some data. It is composed of an encryption algorithm, a decryption algorithm, the plain-text, the cipher-text, and a secret key. The encryption algorithm takes as parameters the plain-text and secret key and outputs the -cipher-text. The decryption algorithm takes as parameters the cipher-text and secret key and outputs the plain-text. The symmetric encryption algorithm chosen in our implementation is AES256, but Salsa20 or ChaCha are also good candidates. \\
 Asymmetric encryption uses two key, one called private and one public, to either encrypt/decrypt or perform digital signatures. Digital signatures are a mathematical technique to validate the authenticity and integrity of a message and are usually used to acknowledge the consent of the signer.  \\
+Our implementation uses Elliptic Curve cryptography.
 Pseudo-random number generators are algorithms that deterministically generates a sequence of numbers whose properties approximate the properties of sequences of random numbers. PRNGs cannot be considered really random as their output is totally determined by an initial value called seed. Our implementation follows the Mersenne Twister PRNG, but the XORShift PNRG family is also a good candidate.
 \section{Type of peers}
 BBAR Gossip introduces two new different node types in the network along with the standard validator, full and seed node. It also modifies the default behaviour of seed node. \\
@@ -208,10 +209,112 @@ The new nodes are called bootstrap and entry nodes. Each node has a particular r
 \end{itemize}
 
 \section{Protocol description}
-\
-\subsection{Network join}
-\subsection{Peer selection}
-\subsection{Data exchange}
+We have divided the protocol into three phases, which a peer has to follow to start exchanging messages and sync his state. 
+\subsection{Epoch concept}
+A cardinal concept and crucial building block of the protocol is the notion of Epoch.  \\
+An epoch is a $\Delta$ $T$ time used to divide time and synchronize peers, and each Bootstrap node decides how long an epoch last. Epochs have to be a monotonically increasing sequence of numbers and must not overlap.
+\subsection{Registraton phase}
+We have divided the protocol into three phases, which a peer has to follow to start exchanging messages and sync his state. 
+
+\begin{figure}[h]
+  \includegraphics[width=\linewidth]{images/register-phase.png}
+  \caption{Register phase chart}
+  \label{fig:register-phase}
+\end{figure}
+
+The first thing a peer has to do to be included in a network is to contact a seed node to receive some bootstrap's entry points addresses. From the list of addresses, the peer will randomly contact a subset of them and start the following message exchange.
+\begin{itemize}
+	\item Peer sends a HELLO message[\ref{tab:hello-message}] to the entry node/s, with his public-key and network address.
+	\item Entry node/s contact the Bootstrap node and send back a REGISTRATION message[\ref{tab:register-message}] , which includes a Hashcash-style puzzle and the corresponding difficulty.
+	\item As soon as the peer finds a solution for the crypto-puzzle, it sends to the entry node/s a LOGIN message[\ref{tab:login-message}] , including the solution.
+	\item The entry node/s checks the validity of the solution. If the solution is valid, sends back a TOKEN message and includes the peer information in the next epoch. Together with a TOKEN message, a VIEW[\ref{tab:view-message}] message is also sent.
+\end{itemize}
+  
+Each bootstrap node can choose the difficulty of the desired solution, meaning that they can control how many registrations they get on average in the next $T$ epochs.\\
+In the last step, after checking that the solution is valid, the entry nodes returns a TOKEN message. The TOKEN message contains a digital signature over the hash of the string generated as the concatenation of the crypto-puzzle, the corresponding solution, and epoch. It is possible for everyone, using this format, to check the validity of the Hashcash solution, (to avoid collusion between the bootstrap node and a peer) and bind the token to a specific epoch. Moreover, the TOKEN message, includes a field called Key, which stores 16 random bytes which will be used later in the protocol. \\
+Still in the last step, the entry nodes sends also a VIEW message which contains a list of all the registered peers with their informations and the next epoch 
+time. \\
+When the next epoch start, every peer in the network has to send back their token to the corresponding Bootstrap node. If the Bootstrap node does not have any PoM against that peer, it will send back a new TOKEN and VIEW message.
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|l|}
+\hline
+           & \textbf{Size}            & \textbf{Description}                                            \\ \hline
+\textbf{Host}       & variable length & Network address of the peer                            \\ \hline
+\textbf{Port}       & 4 byte          & Network port of the peer                               \\ \hline
+\textbf{Public Key} & 33 byte         & Public key encoded as the x coordinate and oddness bit \\ \hline
+\end{tabular}
+}
+\caption{Login message description}
+\label{tab:hello-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+           & \textbf{Size}     & \textbf{Description}                                                  \\ \hline
+\textbf{Difficulty} & 4 bytes  & Integer describing the difficulty of the solution            \\ \hline
+\textbf{Puzzle}     & 49 bytes & Concatenation of the encoded public-key plus a 16 byte nonce \\ \hline
+\end{tabular}
+}
+\caption{Register message description}
+\label{tab:register-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+       & \textbf{Size}            & \textbf{Description}                                                  \\ \hline
+\textbf{Puzzle} & 49 bytes        & Concatenation of the encoded public-key plus a 16 byte nonce \\ \hline
+\textbf{Proof}  & Variable length & The solution to the crypto-puzzle                            \\ \hline
+\end{tabular}
+}
+\caption{Login message description}
+\label{tab:login-message}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                & \textbf{Size}         & \textbf{Description}                                         \\ \hline
+\textbf{Puzzle} & 49 bytes              & Concatenation of the encoded public-key plus a 16 byte nonce \\ \hline
+\textbf{Proof}  & Variable length       & The solution to the crypto-puzzle                            \\ \hline
+\textbf{Token}  & 71 bytes (on average) & The BN digital signature used as token                       \\ \hline
+\textbf{Epoch}  & 4 bytes               & The integer describing the current epoch                     \\ \hline
+\textbf{Key}    & 16 bytes              & Random data used as encryption key                           \\ \hline
+\end{tabular}
+}
+\caption{Token message description}
+\label{tab:token-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                    & \textbf{Size}   & \textbf{Description}                                        \\ \hline
+\textbf{Peer List}  & Variable length & List of peer and their corresponding PK and network address \\ \hline
+\textbf{Epoch}      & 4 byte          & Integer describing the epoch                                \\ \hline
+\textbf{Next epoch} & 4 byte          & Unix timestamp of the next epoch time                       \\ \hline
+\end{tabular}
+}
+\caption{View message description}
+\label{tab:view-message}
+\end{table}
+
+
+
+\subsection{Peer selection phase}
+\subsection{Message exchange phase}
 \section{Details}
 \section{Optimizations}
 
