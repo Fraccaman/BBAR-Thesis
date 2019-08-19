@@ -219,14 +219,14 @@ We have divided the protocol into three phases, which a peer has to follow to st
 \begin{figure}[h]
   \includegraphics[width=\linewidth]{images/register-phase.png}
   \caption{Register phase chart}
-  \label{fig:register-phase}
+  \label{fig:register-flow}
 \end{figure}
 
 The first thing a peer has to do to be included in a network is to contact a seed node to receive some bootstrap's entry points addresses. From the list of addresses, the peer will randomly contact a subset of them and start the following message exchange.
 \begin{itemize}
 	\item Peer sends a HELLO message[\ref{tab:hello-message}] to the entry node/s, with his public-key and network address.
 	\item Entry node/s contact the Bootstrap node and send back a REGISTRATION message[\ref{tab:register-message}] , which includes a Hashcash-style puzzle and the corresponding difficulty.
-	\item As soon as the peer finds a solution for the crypto-puzzle, it sends to the entry node/s a LOGIN message[\ref{tab:login-message}] , including the solution.
+	\item As soon as the peer finds a solution for the crypto-puzzle, it sends to the entry node/s a LOGIN message[\ref{tab:login-message}], including the solution.
 	\item The entry node/s checks the validity of the solution. If the solution is valid, sends back a TOKEN message and includes the peer information in the next epoch. Together with a TOKEN message, a VIEW[\ref{tab:view-message}] message is also sent.
 \end{itemize}
   
@@ -235,6 +235,7 @@ In the last step, after checking that the solution is valid, the entry nodes ret
 Still in the last step, the entry nodes sends also a VIEW message which contains a list of all the registered peers with their informations and the next epoch 
 time. \\
 When the next epoch start, every peer in the network has to send back their token to the corresponding Bootstrap node. If the Bootstrap node does not have any PoM against that peer, it will send back a new TOKEN and VIEW message.
+
 \begin{table}[H]
 \centering
 \resizebox{\textwidth}{!}{%
@@ -315,19 +316,195 @@ When the next epoch start, every peer in the network has to send back their toke
 
 \subsection{Peer selection phase}
 As soon a the registration phase is over, a peer should have received a valid token from the TOKEN message and a list of peers he can contact from the VIEW message. \\
-Instead of randomly selecting a peer in the peer list, the selection is computed using a PNRG seeded with the token received. The output of the PNRG modulus the size of the peer list will generate the index of the selected partner. \\ 
-Using this mechanism, we can make peers accountable for peer-selection and create PoMs in case of misbehavior. 
-\subsection{Message exchange phase}
+Instead of randomly selecting a peer in the peer list, the selection is computed using a PNRG seeded with the token received. The output of the PNRG modulus the size of the peer list will generate the index of the selected partner in the list. \\ If the index number is the peer itself, it generates another random number using the same PRNG, until a valid one comes out.
+Using this mechanism, we can make peers accountable for peer-selection and create PoMs in case of misbehaviour. 
+
+\subsection{Exchange phase}
+The last phase, called Exchange phase, is heavily inspired by BAR Gossip and exploits a sequence of messages to maintain peers accountable for every decision they make.
+
+\begin{figure}[H]
+\centering
+  \includegraphics[width=12cm]{images/exchange-phase.png}
+  \caption{Exchange phase flow}
+  \label{fig:exchange-phase}
+\end{figure}
+
+As soon as a peer determined who has to contact, the protocol follows these steps:
+As soon as a peer determined who has to contact, the protocol follows these steps:
+\begin{itemize}
+	\item A CONNECTIONREQUEST[\ref{tab:connectionrequest-bar-message}] message is sent to the selected partner.
+	\item After validating the connection, the partner sends back a HISTORYDIVULGE[\ref{tab:historydivulge-bar-message}] message, informing the peer that he has accepted his request and giving him the details about his mempool/state as a list of hash identifiers.
+	\item On receiving the HISTORYDIVULGE message, the peer computes the set difference with his mempool/state. Based on those results, it decided if his best choice is a BAR or OPT exchange and sends to his partner an EXCHANGE[\ref{tab:exchange-bar-message}] message containing a list of updates he wants, he will give back and the exchange type to perform.
+	\item The partner checks if the exchange is valid (it will be explained later what it means), and sends back a PROMISE[\ref{tab:promise-bar-message}] message, which affirms the fact that he accepted the exchange, and a BRIEFCASE message, which contains the updates encrypted.
+	\item Upon receiving a valid PROMISED message, the peer also sends to his partner a BRIEFCASE[\ref{tab:briefcase-bar-message}] message.
+	\item Upon receiving a BRIEFCASE message, both peers will start sending a KEYREQUEST[\ref{tab:keyrequest-bar-message}] message to the partner, until either the epoch finish or until a KEY message arrives.
+	\item The KEY[\ref{tab:key-bar-message}] message includes the secret to open the corresponding briefcase, containing the requested updates.
+\end{itemize}
+
+First of all, each message sent during this phase contains a header containing the token plus relative information to verify his validity and a hash of the previous message, so that it is possible to rebuild the message history. \\
+A crucial aspect of the protocol, which is heavily inspired by BARGOSSIP  are the two types of exchanges available: BAL or OPT. A BAL exchange is characterized by the fact each member of the trade promised to exchange the same number of updates, in a TicForTat fashion. As this is not always possible, OPT provided a safe-net mechanism for peers who do not have something to exchange, and they rely on the altruism of other peers. In fact, a peer A who starts an OPT exchange, promises to the other 0 or more updates and asks the partner to send back either the same number of updates as him or more.  \\
+As we want to incentivize the more fair BAL exchange, partner B will add a percentage of random data to the BRIEFCASE message.  \\
+A fundamental difference with BAR Gossip is the fact that the peer sending the CONNECTIONREQUEST message, is the one choosing the type of exchange.  \\
+The Briefcase message is encrypted using a symmetric encryption algorithm where the secret key is received by the Bootstrap node in the TOKEN message. \\
+As in BAR Gossip, all messages are sent through TCP connection expect the KEYREQUEST and KEY message.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                            & \textbf{Size}         & \textbf{Description}                                        \\ \hline
+\textbf{Puzzle}             & 49 bytes              & List of peer and their corresponding PK and network address \\ \hline
+\textbf{Solution}           & Variable length       & Integer describing the epoch                                \\ \hline
+\textbf{Epoch}              & 4 bytes               & Unix timestamp of the next epoch time                       \\ \hline
+\textbf{Token}              & 71 bytes (on average) & The BN digital signature token                              \\ \hline
+\textbf{Prev. Message Hash} & 32 bytes              & The hash of the previous message                            \\ \hline
+\end{tabular}
+}
+\caption{Header description}
+\label{tab:header-bar-message}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                & \textbf{Size} & \textbf{Description}                                               \\ \hline
+\textbf{Header} & Variable size & The header of the message used to verify the peer request validity \\ \hline
+\end{tabular}
+}
+\caption{ConnectionRequest message description}
+\label{tab:connectionrequest-bar-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                    & \textbf{Size}              & \textbf{Description}                                               \\ \hline
+\textbf{Header}     & Variable size              & The header of the message used to verify the peer request validity \\ \hline
+\textbf{Update ids} & Number of updates * 20 bytes & The list containing the identifiers of the updates                     \\ \hline
+\end{tabular}
+}
+\caption{HistoryDivulge message description}
+\label{tab:historydivulge-bar-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                  & \textbf{Size} & \textbf{Description}                                               \\ \hline
+\textbf{Header}   & Variable size & The header of the message used to verify the peer request validity \\ \hline
+\textbf{Needed}   & Variable size & Identifiers of updates the peer needs                              \\ \hline
+\textbf{Promised} & Variable size & Identifiers of updates the peer will trade                         \\ \hline
+\textbf{Type}     & 1 byte        & The type of exchange: BAL, OPT or ABORT.                           \\ \hline
+\end{tabular}
+}
+\caption{Exchange message description}
+\label{tab:exchange-bar-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                  & \textbf{Size} & \textbf{Description}                                               \\ \hline
+\textbf{Header}   & Variable size & The header of the message used to verify the peer request validity \\ \hline
+\textbf{Needed}   & Variable size & Identifiers of updates the peer needs                              \\ \hline
+\textbf{Promised} & Variable size & Identifiers of updates the peer will trade                         \\ \hline
+\textbf{Type}     & 1 byte        & The type of exchange: BAL, OPT or ABORT.                           \\ \hline
+\end{tabular}
+}
+\caption{Promise message description}
+\label{tab:promise-bar-message}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                   & \textbf{Size} & \textbf{Description}                                               \\ \hline
+\textbf{Header}    & Variable size & The header of the message used to verify the peer request validity \\ \hline
+\textbf{Briefcase} & Variable size & The encrypted updates                                              \\ \hline
+\end{tabular}
+}
+\caption{Briefcase message description}
+\label{tab:briefcase-bar-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                & \textbf{Size} & \textbf{Description}                                               \\ \hline
+\textbf{Header} & Variable size & The header of the message used to verify the peer request validity \\ \hline
+\end{tabular}
+}
+\caption{Key Request message description}
+\label{tab:keyrequest-bar-message}
+\end{table}
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|}
+\hline
+                & \textbf{Size} & \textbf{Description}                                               \\ \hline
+\textbf{Header} & Variable size & The header of the message used to verify the peer request validity \\ \hline
+\textbf{Key}    & 16 bytes      & The secret key used to encrypt the briefcase                       \\ \hline
+\end{tabular}
+}
+\caption{Key message description}
+\label{tab:key-bar-message}
+\end{table}
+
 \section{Details}
+\subsection{Proof-of-Misbehavior}
+The idea behind PoMs is to have a mechanism to prove that a member of the network tried to deviate from the protocol. In our protocol (as well as in BAR gossip) this is accomplished through the use of cryptography: digital signatures and hash functions are combined to keep each peer accountable.\\
+ As soon as a peer misbehaves, the partner can use generate a PoM and send it to the corresponding Bootstrap node, who will schedule an eviction in the next epoch.
+
 \subsection{Shuffle peer list each epoch}
+A Bootstrap node could collude with a peer to particularly craft the order peer list in such a way that a peer always contacts the same subset of peers. Due to this issue, the peer list has to be shuffled in a random but verifiable way.  An option which we have used in our implementation to accomplish this task is the following:
+\begin{itemize}
+	\item Sort the peer list by X coordinate of the public-key.
+	\item Seed a PNRG with a public seed (i.e., the current epoch) and generate a sequence of unique numbers from 0 to the size of the list.
+	\item Shuffle the peer list according to the generated sequence (i.e., first peer in the sorted list goes to the position specified by the first number in the sequence).
+\end{itemize}
+
 \subsection{Multiple BN registration per peer}
-\subsection{Entry nodes selection}
-\subsection{Timeout during exchange phases}
+An important factor for this protocol is that peers need to be registered with multiple Bootstrap nodes. This is because there has to be at least a path which links all the bootstrap node networks into a single one. Otherwise, peers would be able to exchange only the information inside a single bootstrap network which is only a subset of the whole network. \\ 
+Obviously, this comes with a trade-off: the more registration a peer has, the more trades he has to do meaning that he will use more bandwidth and resources.
+
+\subsection{Fair exchange problem}
+The reason why a Bootstrap node has to give the secret key for encrypting the briefcase together with the token is that a malicious peer could create some fake updates identifiers to perform a BAL exchange, wait for the partner KEY message and then fake a crash or timeout. Using this strategy, one of the peers receives the updates; meanwhile, the other would not be able to decrypt the BRIEFCASE, which contains garbage data. This problem can be reduced to the fair exchange problem, which is actually impossible to solve without a trusted third party. In our case, the BN node acts as a TTP. If a peer does not receive the KEY message, he can send an MPoM (Maybe-Proof-of-Misbehavior) with the encrypted briefcase. The bootstrap node will decrypt the BRIEFCASE message, check the validity of the updates, and if the updates are legit, send back the key to the peer. Otherwise, it will ban the peer's partner.
+
 \subsection{PoM rewards}
-\subsection{Faster consensus}
+As sending PoM is resource expensive for peers, we need to incentivize this behavior. A possible solution is the following: since bootstrap nodes are linked to Validators which are block producers, we can incentivize this behavior by giving priority of receiving the new blocks to those peers that send valid PoMs or MPoMs.
+
 \section{Optimizations}
+There are several ways to improve the performance of the protocol, but the ones with the most gains are the following two.
+
 \subsection{History exchange}
+One of the most resource-consuming messages is the HISTORYDIVULGE, as the partner has to provide a list containing a list of hash identifiers. This scale linearly with the number of updates. \\
+The more straightforward way to decrease the size of the list would be to encoded the identifiers with a smaller format and to reduce the number of identifiers. This is archivable by:
+\begin{itemize}
+	\item Using a hash function with a smaller output such as RIPEMD-160.
+	\item Heuristically chose a subset of updates
+\end{itemize}
+A more sophisticated way to accomplish this task is to encode the updates into a more efficient data structure such as an Inverse Bloom Lookup Table or a Set Sketch. \\
+Those kind of data structure are very efficient for set reconciliation tasks as they are able to encode data (in our case the identifiers) in a bloom filter fashion but with the added features that it is possible to recover the whole set of encoded data, and it is possible to perform the subtraction between two of them.
+
 \subsection{Message header}
+The message header takes a non-trivial amount of bytes in each message. It is possible for each peer to send just the first message with the full header.\\ Meanwhile, the following messages could contain just a hash of it.
 
 \chapter{Evaluation}
 \section{BBAR vs BAR}
@@ -361,7 +538,7 @@ Using this mechanism, we can make peers accountable for peer-selection and creat
 %
 %\backmatter
 %
-%\chapter{Glossary} %optional
+\chapter{Glossary} %optional
 
 %\bibliographystyle{alpha}
 %\bibliographystyle{dcu}
