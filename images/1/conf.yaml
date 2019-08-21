@@ -1,0 +1,38 @@
+# number of maximum transactions
+TX_TOTAL: 10000
+# average size of a transaction
+TX_MEAN_SIZE: 280
+# stdev of size of a transaction
+TX_STDEV_SIZE: 10
+
+# number of bootstrap nodes
+BOOTSTRAP_NODE_TOTAL: 8
+
+# number of full nodes (FULL_NODE_TOTAL - RATIONAL_FULL_NODES - BYZANTINE_FULL_NODES >= 0)
+FULL_NODE_TOTAL: 250
+# number of rational nodes
+RATIONAL_FULL_NODES: 0
+#number of byzantine nodes
+BYZANTINE_FULL_NODES: 0
+
+# number of epochs
+EPOCHS: 200
+
+# time it takes to rejoin a bootstrap node if got banned
+POW_EXPENSIVENESS: 3
+# probability for a byzantine node to behave bad
+BYZANTINE_LEVEL: 0.4
+# size of mempool of each node
+MEMPOOL_TOTAL: 70
+# std of mempool size
+MEMPOOL_STD: 25
+# number of bootstrap node registration per full node
+SUBSCRIPTION_TOTAL: 2
+
+# number of maximum exchange per Balanced Exchange
+MAX_BAL_EX: 12
+# number of maximum exchange per Optimistic Push
+MAX_OPT_EX: 20
+
+# Deterministic reproducibility seed
+SEED: 1337

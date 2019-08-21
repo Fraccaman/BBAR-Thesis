@@ -342,7 +342,7 @@ As soon as a peer determined who has to contact, the protocol follows these step
 \end{itemize}
 
 First of all, each message sent during this phase contains a header containing the token plus relative information to verify his validity and a hash of the previous message, so that it is possible to rebuild the message history. \\
-A crucial aspect of the protocol, which is heavily inspired by BARGOSSIP  are the two types of exchanges available: BAL or OPT. A BAL exchange is characterized by the fact each member of the trade promised to exchange the same number of updates, in a TicForTat fashion. As this is not always possible, OPT provided a safe-net mechanism for peers who do not have something to exchange, and they rely on the altruism of other peers. In fact, a peer A who starts an OPT exchange, promises to the other 0 or more updates and asks the partner to send back either the same number of updates as him or more.  \\
+A crucial aspect of the protocol, which is heavily inspired by BARGOSSIP  are the two types of exchanges available: BAL or OPT. A BAL exchange is characterized by the fact each member of the trade promised to exchange the same number of updates, in a TicForTat fashion. As this is not always possible, OPT provided a safe-net mechanism for peers who do not have something to exchange, and they rely on the altruism of other peers. In fact, a peer A who starts an OPT exchange, promises to the other 0 or more updates and asks the partner to send back either the same number of updates as him or more. Moreover, the number of updates exchange during each trade is bounded both for BAL and OPT, as this increase the possibility for a peer to start a BAL exchange. \\
 As we want to incentivize the more fair BAL exchange, partner B will add a percentage of random data to the BRIEFCASE message.  \\
 A fundamental difference with BAR Gossip is the fact that the peer sending the CONNECTIONREQUEST message, is the one choosing the type of exchange.  \\
 The Briefcase message is encrypted using a symmetric encryption algorithm where the secret key is received by the Bootstrap node in the TOKEN message. \\
@@ -508,46 +508,343 @@ The message header takes a non-trivial amount of bytes in each message. It is po
 
 \chapter{Evaluation}
 \section{BBAR vs BAR}
+I am not sure I will be able to plot the necessary data. Can i just explain the difference and similarity with BAR gossip?
 \section{Simulation vs Prototype}
+In order to evaluate our protocol we decided to implement both a prototype, with all the features described in the previous chapter, and a simulator, which is more scalable and easier to manage. \\
+We setup the prototype and simulator with the same parameters: 
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|l|}
+\hline
+                                 & \textbf{Value} & \textbf{Description}                                                  \\ \hline
+\textbf{Bootstrap nodes}         & 3              & The number of BNs in the simulation                                   \\ \hline
+\textbf{Full nodes}              & 25            & Total number of FN in the simulation. They are ALTRUISTIC by default. \\ \hline
+\textbf{Rational nodes}          & 10       & Percentage of rational nodes                                          \\ \hline
+\textbf{Byzantine nodes}         & 5       & Percentage of byzantine nodes                                         \\ \hline
+\textbf{Epochs}                  & 40            & Number of epochs                                                      \\ \hline
+\textbf{PoW Difficulty}          & 3              & Difficulty expressed as number of epochs                              \\ \hline
+\textbf{Byzantine level}         & 0.3            & Probability for a byzantine node to act byzantine during an exchange  \\ \hline
+\textbf{Mempool size}            & 20, 0         & Mean and standard deviation of peer's mempool size                    \\ \hline
+\textbf{Number of subscriptions} & 2       & Number of registration per peer                                       \\ \hline
+\textbf{Max BAL exchange}        & 8             & Maximum number of updates per BAL exchange                            \\ \hline
+\textbf{Max OPT exchange}        & 15             & Maximum number of updates per OPT exchange                            \\ \hline
+\end{tabular}%
+}
+\caption{Simulation parameters description}
+\label{tab:simulation-paramters}
+\end{table}
+ 
+Due to some limitation in the prototype implementation and as most of the actions taken are based on a random coin flip, we are not able to run two identically models even if the parameters are the same.
+
+\begin{figure}[H]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/5/5-connectivity.png}
+  	\caption{Simulation connectivity}
+  	\label{fig:sim-one-duplicates}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/6/6-connectivity.png}
+       \caption{Prototype connectivitys}
+ 		\label{fig:sim-two-duplicates}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/5/5-conv.png}
+  	\caption{Simulation convergence rate}
+  	\label{fig:sim-one-duplicates}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/6/6-conv.png}
+       \caption{Prototype convergence rate}
+ 		\label{fig:sim-two-duplicates}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/5/5-exchanges.png}
+  	\caption{SimulationPrototype exchange per epochs}
+  	\label{fig:sim-one-duplicates}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/6/6-exchanges.png}
+       \caption{Prototype exchange per epoch}
+ 		\label{fig:sim-two-duplicates}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/5/5-ex-type.png}
+  	\caption{Simulation exchange type per epoch}
+  	\label{fig:sim-one-duplicates}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/6/6-ex-type}
+       \caption{Prototype exchange type per epoch}
+ 		\label{fig:sim-two-duplicates}
+   \end{minipage}
+\end{figure}
+
+Most of the metrics in the figures above, show very similar data. Our prototype has a little slower convergence rate and exchange per epoch but this is probably due to small known implementation issues. \\
+Still, looking at the plots gives us a high confidence that the simulation can faithfully match a real environment.
 
 \chapter{Experiments}
-\section{Setup}
-\section{Convergences rate}
-\section{Duplicates}
-\section{Exchange types}
-\section{Edge cases}
+In this chapter we are going to test the protocol under different assumptions. The parameters taken into account are the following:
 
-\chapter{Conclusions}
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|l|}
+\hline
+                                 & \textbf{Value} & \textbf{Description}                                                  \\ \hline
+\textbf{Bootstrap nodes}         & 8              & The number of BNs in the simulation                                   \\ \hline
+\textbf{Full nodes}              & 250            & Total number of FN in the simulation. They are ALTRUISTIC by default. \\ \hline
+\textbf{Rational nodes}          & Variable       & Percentage of rational nodes                                          \\ \hline
+\textbf{Byzantine nodes}         & Variable       & Percentage of byzantine nodes                                         \\ \hline
+\textbf{Epochs}                  & 200            & Number of epochs                                                      \\ \hline
+\textbf{PoW Difficulty}          & 3              & Difficulty expressed as number of epochs                              \\ \hline
+\textbf{Byzantine level}         & 0.4            & Probability for a byzantine node to act byzantine during an exchange  \\ \hline
+\textbf{Mempool size}            & 70, 25         & Mean and standard deviation of peer's mempool size                    \\ \hline
+\textbf{Number of subscriptions} & Variable       & Number of registration per peer                                       \\ \hline
+\textbf{Max BAL exchange}        & 12             & Maximum number of updates per BAL exchange                            \\ \hline
+\textbf{Max OPT exchange}        & 20             & Maximum number of updates per OPT exchange                            \\ \hline
+\end{tabular}%
+}
+\caption{Simulation parameters description}
+\label{tab:simulation-paramters}
+\end{table}
+
+The main goal of these experiments is to see how the protocol behaves under different model such as presence of rational or byzantine or both. We analyze the simulation looking at different factors such as convergence rate, number of duplicate packets, type of exchange, etc. \\
+In the end we will also take into consideration some edge cases and see how much the system is resilient against disruption.
+
+\section{Setup}
+In the following sections, we will three general simulation in order to see how much the presence of rational and byzantine nodes afflict the system. \\
+The parameters of the tree simulation are the following:
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|l|l|l|}
+\hline
+                                 & \textbf{Simulation One} & \textbf{Simulation two} & \textbf{Simulation 3} \\ \hline
+\textbf{Rational nodes}          & 0                       & 100                     & 100                   \\ \hline
+\textbf{Byzantine nodes}         & 0                       & 0                       & 50                    \\ \hline
+\textbf{Number of subscriptions} & 2                       & 2                       & 2                     \\ \hline
+\end{tabular}%
+}
+\caption{Simulation parameters}
+\label{tab:simulation-parameters-two}
+\end{table}
+
+Moreover, important factors in the simulation are the connectivity between bootstrap nodes and the number and distribution of node by their nature.
+
+\begin{figure}[!htb]
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/1/1-peer-nature-per-bn.png}
+     \caption{First simulation peer distribution and nature}
+     \label{fig:sim-one-init-distribution}
+   \end{minipage}\hfill
+   \begin{minipage}{0.48\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/2/two-peer-nature-per-bn.png}
+     \caption{Second simulation peer distribution and nature}
+     \label{fig:sim-two-init-distribution}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=7cm]{images/3/3-peer-nature-per-bn.png}
+  \caption{Third simulation peer distribution and nature}
+  \label{fig:sim-three-init-distribution}
+\end{figure}
+
+As we can see from figure \ref{fig:sim-one-init-distribution}, \ref{fig:sim-two-init-distribution} and \ref{fig:sim-three-init-distribution}, each bootstrap node has more or less the same number of peer and, in the second and first simulation also the distribution of rational and byzantine actors is even. \\
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=10cm]{images/1/1-connectivity-heatmap.png}
+  \caption{Number of peers in common between bootstrap nodes}
+  \label{fig:connectivity-general}
+\end{figure}
+
+Moreover, from figure \ref{fig:connectivity-general}, we can also see that each bootstrap node has a connection with all the other bootstrap node meaning that the network is fully connected. This is a needed condition in order for the protocol to work. 
+
+\section{Convergences rate}
+The first propriety we want to analyze is the converge rate. 
+
+\begin{figure}[!htb]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/1/1-convergence.png}
+  	\caption{1st simulation convergence rate}
+  	\label{fig:sim-one-conv}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/2/two-convergence.png}
+       \caption{2nd simulation convergence rate}
+ 		\label{fig:sim-two-conv}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=7cm]{images/3/3-convergence.png}
+  \caption{3rd simulation converge rate}
+  \label{fig:sim-three-conv}
+\end{figure}
+
+
+As we can see from figures \ref{fig:sim-one-conv} and \ref{fig:sim-two-conv}, the presence of rational nodes does not affect the convergence rate at all until the last 20 epochs. This sounds reasonable as peer's mempool are going to be more full and OPT messages help peers get the last missing updates if they don't have anything to share. Since rational nodes don't accept OPT exchanges, full network convergence is more difficult to reach. \\
+The situation change n figure \ref{fig:sim-three-conv}, when byzantine actors are introduced. In the last figure we can clearly see that more peers are having a hard time receiving updates and in 200 epochs are not enough to reach the same level of convergence of the previous situations. Still, even if more peers are having troubles, most of them (as shown in the distribution of bars) have a mempool size above the mean. 
+\section{Duplicates}
+As we want to avoid wasting resources, an important metrics is the number of duplicates updates received.
+
+\begin{figure}[!htb]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/1/1-duplicates.png}
+  	\caption{1st simulation duplicates updates}
+  	\label{fig:sim-one-duplicates}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/2/two-duplicates.png}
+       \caption{2nd simulation duplicates updates}
+ 		\label{fig:sim-two-duplicates}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=7cm]{images/3/3-duplicates.png}
+  \caption{3rd simulation duplicates updates}
+  \label{fig:sim-three-duplicates}
+\end{figure}
+
+As we can see from figures \ref{fig:sim-one-duplicates}, \ref{fig:sim-two-duplicates}, and \ref{fig:sim-three-duplicates} the number of duplicates updates tends to be higher in the final steps of the simulations. This is because mempools are becoming fuller and so, since peers exchange updates concurrently, there is higher probability to receive a duplicate. \\
+Moreover, as more byzantine and rational peer are introduces in the network, number of duplicates mean also decrease. This is because less exchange are made as rational peers don't accept OPT messages and byzantine have a probability of invalidating the exchange. \\
+Still, even if the mean in the last figure is lower than in the other two, we have to remember that the third simulation wasn't able to reach full network convergence.
+
+\section{Exchange types}
+Another crucial metrics is the percentage of BAL exchange versus OPT and ABORT. Since we want to incentivise peers to execute, as much as possible, the tic-for-tac trade we need to see if our simulations support this requirements.
+
+\begin{figure}[!htb]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/1/1-exchanges-type-epoch}
+  	\caption{1st simulation exchange types per epoch}
+  	\label{fig:sim-one-duplicates}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/2/2-exchanges-type-epoch.png}
+       \caption{2nd simulation exchange types per epoch }
+ 		\label{fig:sim-two-duplicates}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=7cm]{images/3/3-types.png}
+  \caption{3rd simulation exchange types per epoch }
+  \label{fig:sim-three-duplicates}
+\end{figure}
+
+It is clearly visible that the most used exchange is BAL, followed by ABORT and then OPT. Interesting is the fact that OPT exchanges are needed in the last phases of the protocol, when peers are not interested anymore in updates (as they have all of them) and only trades if they are altruistic.
+In fact, the first simulation is the one containing more OPT exchanged, as everyone is altruistic. \\
+Instead, the last simulation is the one with more ABORT exchange, as part of the peers act byzantine. Due to this high number of abort the network is not able to converge as fast as the two other scenarios.
+
+\subsection{Number of exchange per epoch}
+The last interesting metric is the number of non-aborted exchange done in each epoch.
+
+\begin{figure}[!htb]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/1/1-exchange-number-epoch.png}
+  	\caption{1st simulation number of trade per peer per epoch}
+  	\label{fig:sim-one-numbers}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/2/two-number-of-exchange-per-peer.png}
+       \caption{2nd simulation number of trade per peer per epoch}
+ 		\label{fig:sim-two-numbers}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=7cm]{images/3/3-exchane-n.png}
+  \caption{3rd simulation number of trade per peer per epoch}
+  \label{fig:sim-three-numbers}
+\end{figure}
+
+We can instantly see that the presence of byzantine peers decrease exchange number mean in the last figure \ref{fig:sim-three-numbers}. Instead, in the the first two plots \ref{fig:sim-two-numbers} \ref{fig:sim-one-numbers}, the only difference is the steepness of the tail. This is due to the presence of rational nodes who don't want to accept OPT trades which are mostly present in the last epochs. 
+
+\section{Insights}
+\subsection{Connectivity}
+The number of subscription per peer is one of the most important parameters: too low and some bootstrap node would be low connected to the network or even disconnected meaning that peers wouldn't be able to receive information from the whole network.
+Instead, a too high parameters would create too many exchange, meaning a higher number of duplicates and wasted bandwidth. 
+
+\begin{figure}[!htb]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/4/4-heatmap.png}
+  	\caption{4th Simulation heatmap}
+  	\label{fig:sim-one-conv}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/4/4-ex-type.png}
+       \caption{4th simulation exchange types}
+ 		\label{fig:sim-two-conv}
+   \end{minipage}
+\end{figure}
+
+\begin{figure}[!htb]
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/4/4-conv.png}
+  	\caption{4th simulation convergence rate}
+  	\label{fig:sim-forth-conv}
+   \end{minipage}\hfill
+   \begin{minipage}{0.49\textwidth}
+     \centering
+     \includegraphics[width=\linewidth]{images/4/4-duplicates.png}
+       \caption{4th simulation duplicates per epoch}
+ 		\label{fig:sim-forth-duplicates}
+   \end{minipage}
+\end{figure}
+
+In order to prove this arguments we have run a simulation with the same parameters as our third, but a number of subscription of 4. \\
+Due to the fact that, on average, each peer completes 2 trades per epoch per bootstrap node, with 4 bootstrap node we have a total of 8 connection per peer. This drastically increase the number of received updates meaning a faster convergence rate as shown in \ref{fig:sim-forth-conv}. It also means a higher number of duplicates \ref{fig:sim-forth-duplicates}. \\
+We also want to point out that the a higher convergence rate could be archived by incresing the number of max update sharable in a BAL or OPT trade. Even if this is true, it would limit the fact that we want maximize the total number of BAL updates. Moreover, a less clustered network is more robust and reliable to synbil and eclipse attacks. 
+
+\chapter{Conclusion}
 \section{Discussion}
 \section{Future works}
 
+\chapter{Glossary}
 
-%\chapter[Short title]{A chapter title which will run over two lines --- it's for
-%  testing purpose}
-%
-%\lipsum[1-2]
-%
-%\section{The first section}
-%\lipsum[3-4]
-%
-%\appendix %optional, use only if you have an appendix
-%
-%\chapter{Some retarded material}
-%\section{It's over\dots}
-%\lipsum 
-%
-%\backmatter
-%
-\chapter{Glossary} %optional
-
-%\bibliographystyle{alpha}
-%\bibliographystyle{dcu}
 \bibliographystyle{plainnat}
 \bibliography{biblio}
 
-%\cleardoublepage
-%\theindex %optional, use only if you have an index, must use
-	  %\makeindex in the preamble
 \lipsum
 
 \end{document}
