@@ -26,7 +26,7 @@ morecomment=[l]{//s},
 \Year{2019} %compulsory, put only the year
 \place{Lugano} %compulsory
 
-\dedication{To Satoshi} %optional
+\dedication{To everyone who believed in me.} %optional
 \openepigraph{Arise, you have nothing to lose but your barbed wire fences!}{Timothy C. May} %optional
 
 %\makeindex %optional, also comment out \theindex at the end
@@ -55,7 +55,8 @@ This thesis present Blockchain BAR Gossip, a protocol inspired by BAR Gossip, to
 First off all I want to thank Prof. Fernando Pedone, for his guidance but, most of all, for keeping up with me for two thesis considering my awful english. \\
 I would also like to thank the experts who were involved in the development of the thesis, especially Zarko Milosevic. \\
 Further, I want also to thank  my parents for all the support during the last rollecostered five years. You are and always been there for me. \\
-Finally, I would like to thank all the people I have in the last 5 years with whom I have .... .
+Then, I would like to thank all the people I have met in the last five years. We shared some good and bad memories which I will forever keep tight. \\
+Last, but not least, a special thank goes to P. who made me realize how many things I was missing in life. 
 
 \end{acknowledgements}
 
@@ -66,8 +67,8 @@ Finally, I would like to thank all the people I have in the last 5 years with wh
 \mainmatter
 
 \chapter{Introduction}
-During the last ten years, after the born of Bitcoin, blockchain-based systems became an important building block in several applications, ranging from financial to legal services. As the need for this kind of distributed structured grew, more advanced and sophisticated versions have been built to meet real-world throughput demands. \\
-In fact, as the current Bitcoin protocol can handle only seven transactions per second, other protocols like Tendermint or Hyperledger can handle volumes of operations in the order of thousands per second. \\
+During the last ten years, after the born of Bitcoin\citep{nakamoto2008bitcoin}, blockchain-based systems became an important building block in several applications, ranging from financial to legal services. As the need for this kind of distributed structured grew, more advanced and sophisticated versions have been built to meet real-world throughput demands. \\
+In fact, as the current Bitcoin protocol can handle only seven transactions per second, other protocols like Tendermint\citep{kwon2014tendermint} or Hyperledger can handle volumes of operations in the order of thousands per second. \\
 This is because the latter systems differ in the consensus mechanism, allowing for better performance and higher scalability at the cost of less decentralization. \\
 One of the aspects which is typical for most of those systems is the fact that they exchange information through a gossip protocol. Most of the time, this network can be freely joined by anyone, meaning that everyone receives and share updates on the state with other peers. 
 As receiving updates reliably and quickly is a key aspect for these kinds of protocols, the P2P network is a crucial aspect as it offers many advantages and disadvantages. \\
@@ -78,7 +79,7 @@ Building a faster, safer, and more reliable gossip protocol for blockchains woul
 Blockchain systems offer an alternative way to settle an operation between two parties without having to rely on a trusted third party. The most famous and common example is the use of Bitcoin as a method of payments without having to rely on a bank or any other financial service. \\
 This is particularly useful because it is possible to decrease the costs associated with the service offered by the mediator and acquire a higher level of trust as the operations can be carried on just by the two (or more) persons involved in the exchange.  \\
 As we said before, due to the decentralized nature of these systems, gossip protocols, also called P2P, are heavily employed since they offer a high degree of scalability, fault-tolerance, robustness, fast-spreading and resilience, proprieties which are a perfect match for a decentralized system. \\
-Still, these protocols have their disadvantages. First of all, as anyone can join the network without any sort of registration, it is hard to account for their behaviour and punish it. Being not able to punish peers for their incorrect behaviour is even worse in cases where this is done on purpose leading to Sybil or Eclipse attacks (which are going to be discussed later on).\\
+Still, these protocols have their disadvantages. First of all, as anyone can join the network without any sort of registration, it is hard to account for their behaviour and punish it. Being not able to punish peers for their incorrect behaviour is even worse in cases where this is done on purpose leading to Sybil\citep{douceur2002sybil} or Eclipse\citep{singh2006eclipse} attacks (which are going to be discussed later on).\\
 So, due to the crucial role of the gossip protocol in a blockchain system, we need to be able to ensure its correctness even in the presence of malicious peers.
 
 \section{Scope}
@@ -150,7 +151,7 @@ A Sybil attack is a kind of security threat where one person tries to take over 
 Eclipse attacks are a more powerful Sybil attack where an attacker is able to pollute the whole network view of a peer, meaning that the victim cannot understand whether the information he receives is correct or not.
 \subsection{Gossip in blockchains}
 As of 2019, many blockchains were born, each one providing different services, ranging from financial to juridical and gossip protocol. Most of the time, the p2p network is used to propagate messaging containing blocks or transactions, but there are also examples of blockchain which use gossip to disseminate message for consensus purposes.\\
-The most famous and most used blockchain is Bitcoin. In the Bitcoin p2p network, peers maintain a routing table containing the connection information of all the peers they have known about until that time. Every $\Delta$ time $T$, a subset of peers is chosen to start exchange messages using a lazy push-based strategy. Another relevant blockchain is Ethereum, which gossip protocol is pretty similar to Bitcoin's. One relevant fact about Ethereum's p2p protocol is the fact that it has been found vulnerable to an eclipse attack in 2015 and since then a new peer sampling mechanism has been added to remove the issue. \\
+The most famous and most used blockchain is Bitcoin. In the Bitcoin p2p network, peers maintain a routing table containing the connection information of all the peers they have known about until that time. Every $\Delta$ time $T$, a subset of peers is chosen to start exchange messages using a lazy push-based strategy. Another relevant blockchain is Ethereum\citep{wood2014ethereum}, which gossip protocol is pretty similar to Bitcoin's. One relevant fact about Ethereum's p2p protocol is the fact that it has been found vulnerable to an eclipse attack in 2015 and since then a new peer sampling mechanism has been added to remove the issue. \\
 Looking at less decentralized blockchain, we have Hyperledger Fabric which divides gossip into push-based and pull-based times. Another one of this kind is Tendermint, which instead follows an eager push-based strategy. Tendermint exploits also gossip to disseminate consensus messages between validators.
 
 \section{BAR model \& BAR Gossip}
@@ -207,7 +208,7 @@ Hash functions are any function which can be used to map arbitrary length data o
 	\item Second-image resistance
 	\item Collision resistance
 \end{itemize}
-In addition to their normal use, we will exploit hash function to build cryptographic hash-based proof-of-work, as Hashcash. Hashcash PoW, are resource intensive to compute but easy to verify and provide a valid mechanism to limit spam attacks. \\
+In addition to their normal use, we will exploit hash function to build cryptographic hash-based proof-of-work, as Hashcash\citep{back2002hashcash}. Hashcash PoW, are resource intensive to compute but easy to verify and provide a valid mechanism to limit spam attacks. \\
 The hashing function chosen in our implementation is SHA256, but other good candidates are SHA3 or BLAKE2. \\
 Symmetric encryption is an encryption mechanism that uses the same key to encrypt and decrypt some data. It is composed of an encryption algorithm, a decryption algorithm, the plain-text, the cipher-text, and a secret key. The encryption algorithm takes as parameters the plain-text and secret key and outputs the cipher-text. The decryption algorithm takes as parameters the cipher-text and secret key and outputs the plain-text. The symmetric encryption algorithm chosen in our implementation is AES256, but Salsa20 or ChaCha are also good candidates. \\
 Asymmetric encryption uses two key, one called private and one public, to either encrypt/decrypt or perform digital signatures. Digital signatures are a mathematical technique to validate the authenticity and integrity of a message and are usually used to acknowledge the consent of the signer.  \\
@@ -357,7 +358,7 @@ As soon as a peer determined who has to contact, the protocol follows these step
 \end{itemize}
 
 First of all, each message sent during this phase contains a header containing the token plus relative information to verify his validity and a hash of the previous message, so that it is possible to rebuild the message history. \\
-A crucial aspect of the protocol, which is heavily inspired by BARGOSSIP  are the two types of exchanges available: BAL or OPT. A BAL exchange is characterized by the fact each member of the trade promised to exchange the same number of updates, in a TicForTat fashion. As this is not always possible, OPT provided a safe-net mechanism for peers who do not have something to exchange, and they rely on the altruism of other peers. In fact, a peer A who starts an OPT exchange, promises to the other 0 or more updates and asks the partner to send back either the same number of updates as him or more. Moreover, the number of updates exchange during each trade is bounded both for BAL and OPT, as this increase the possibility for a peer to start a BAL exchange. \\
+A crucial aspect of the protocol, which is heavily inspired by BAR Gossip\citep{li2006bar}, are the two types of exchanges available: BAL or OPT. A BAL exchange is characterized by the fact each member of the trade promised to exchange the same number of updates, in a TicForTat fashion. As this is not always possible, OPT provided a safe-net mechanism for peers who do not have something to exchange, and they rely on the altruism of other peers. In fact, a peer A who starts an OPT exchange, promises to the other 0 or more updates and asks the partner to send back either the same number of updates as him or more. Moreover, the number of updates exchange during each trade is bounded both for BAL and OPT, as this increase the possibility for a peer to start a BAL exchange. \\
 As we want to incentivize the more fair BAL exchange, partner B will add a percentage of random data to the BRIEFCASE message.  \\
 A fundamental difference with BAR Gossip is the fact that the peer sending the CONNECTIONREQUEST message, is the one choosing the type of exchange.  \\
 The Briefcase message is encrypted using a symmetric encryption algorithm where the secret key is received by the Bootstrap node in the TOKEN message. \\
@@ -500,7 +501,7 @@ An important factor for this protocol is that peers need to be registered with m
 Obviously, this comes with a trade-off: the more registration a peer has, the more trades he has to do meaning that he will use more bandwidth and resources.
 
 \subsection{Fair exchange problem}
-The reason why a Bootstrap node has to give the secret key for encrypting the briefcase together with the token is that a malicious peer could create some fake updates identifiers to perform a BAL exchange, wait for the partner KEY message and then fake a crash or timeout. Using this strategy, one of the peers receives the updates; meanwhile, the other would not be able to decrypt the BRIEFCASE, which contains garbage data. This problem can be reduced to the fair exchange problem, which is actually impossible to solve without a trusted third party. In our case, the BN node acts as a TTP. If a peer does not receive the KEY message, he can send an MPoM (Maybe-Proof-of-Misbehavior) with the encrypted briefcase. The bootstrap node will decrypt the BRIEFCASE message, check the validity of the updates, and if the updates are legit, send back the key to the peer. Otherwise, it will ban the peer's partner.
+The reason why a Bootstrap node has to give the secret key for encrypting the briefcase together with the token is that a malicious peer could create some fake updates identifiers to perform a BAL exchange, wait for the partner KEY message and then fake a crash or timeout. Using this strategy, one of the peers receives the updates; meanwhile, the other would not be able to decrypt the BRIEFCASE, which contains garbage data. This problem can be reduced to the fair exchange problem, which is actually impossible to solve without a trusted third party\citep{pagnia1999impossibility}. In our case, the BN node acts as a TTP. If a peer does not receive the KEY message, he can send an MPoM (Maybe-Proof-of-Misbehavior) with the encrypted briefcase. The bootstrap node will decrypt the BRIEFCASE message, check the validity of the updates, and if the updates are legit, send back the key to the peer. Otherwise, it will ban the peer's partner.
 
 \subsection{PoM rewards}
 As sending PoM is resource expensive for peers, we need to incentivize this behavior. A possible solution is the following: since bootstrap nodes are linked to Validators which are block producers, we can incentivize this behavior by giving priority of receiving the new blocks to those peers that send valid PoMs or MPoMs.
@@ -587,13 +588,13 @@ Due to some limitation in the prototype implementation and as most of the action
    \begin{minipage}{0.49\textwidth}
      \centering
      \includegraphics[width=\linewidth]{images/5/5-exchanges.png}
-  	\caption{SimulationPrototype exchange per epochs}
+  	\caption{Simulation exchanges per epoch}
   	\label{fig:sim-one-duplicates}
    \end{minipage}\hfill
    \begin{minipage}{0.49\textwidth}
      \centering
      \includegraphics[width=\linewidth]{images/6/6-exchanges.png}
-       \caption{Prototype exchange per epoch}
+       \caption{Prototype exchanges per epoch}
  		\label{fig:sim-two-duplicates}
    \end{minipage}
 \end{figure}
@@ -850,7 +851,7 @@ Instead, a too high parameters would create too many exchange, meaning a higher 
 
 In order to prove this arguments we have run a simulation with the same parameters as our third, but a number of subscription of 4. \\
 Due to the fact that, on average, each peer completes 2 trades per epoch per bootstrap node, with 4 bootstrap node we have a total of 8 connection per peer. This drastically increase the number of received updates meaning a faster convergence rate as shown in \ref{fig:sim-forth-conv}. It also means a higher number of duplicates \ref{fig:sim-forth-duplicates}. \\
-We also want to point out that the a higher convergence rate could be archived by incresing the number of max update sharable in a BAL or OPT trade. Even if this is true, it would limit the fact that we want maximize the total number of BAL updates. Moreover, a less clustered network is more robust and reliable to synbil and eclipse attacks. 
+We also want to point out that the a higher convergence rate could be archived by incresing the number of max update sharable in a BAL or OPT trade. Even if this is true, it would limit the fact that we want maximize the total number of BAL updates. Moreover, a less clustered network is more robust and reliable to sybil and eclipse attacks. 
 
 \chapter{Conclusion}
 Let us now summarize the report and draw the final conclusion. \\
@@ -861,13 +862,11 @@ In the next two chapters we first evaluated our simulator using a prototype and 
 In conclusion, we have been able to provide a gossip protocol for blockchains under that BAR model assumption adopting techniques derived from BAR Gossip.
 \section{Future works}
 Many improvements can be made to improve both the performance and reliability of BBAR Gossip. As we already described, sharing the entire history with the partner is a very resource wasting task and needs to be optimized by either share only a subset or by using some better, more suited data structures. \\
-Moreover, other improvements discussed in subsequent researches of BAR Gossip, such as erasure code as done in Flighpath, could be used to generally improve the system.
-
-\chapter{Glossary}
+Moreover, other improvements discussed in subsequent researches of BAR Gossip, such as erasure code as done in Flighpath\citep{li2008flightpath}, could be used to generally improve the system.
 
 \bibliographystyle{plainnat}
 \bibliography{biblio}
 
-\lipsum
+
 
 \end{document}
