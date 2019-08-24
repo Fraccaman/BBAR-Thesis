@@ -13,9 +13,9 @@ morecomment=[l]{//s},
 
 
 
-\title{Blochchain BAR Gossip} %compulsory
-\specialization{Finantial Technology and Computing}%optional
-\subtitle{Reliable and clustered gossiping protocol} %optional 
+\title{Blockchain BAR Gossip} %compulsory
+\specialization{Financial Technology and Computing}%optional
+\subtitle{Accountable, deterministic and clustered Gossiping protocol} %optional 
 \author{Gianmarco Fraccaroli} %compulsory
 \begin{committee}
 \advisor{Prof.}{Fernando}{Pedone} %compulsory
@@ -26,8 +26,8 @@ morecomment=[l]{//s},
 \Year{2019} %compulsory, put only the year
 \place{Lugano} %compulsory
 
-\dedication{To my beloved} %optional
-\openepigraph{Someone said \dots}{Someone} %optional
+\dedication{To Satoshi} %optional
+\openepigraph{Arise, you have nothing to lose but your barbed wire fences!}{Timothy C. May} %optional
 
 %\makeindex %optional, also comment out \theindex at the end
 
@@ -38,7 +38,9 @@ morecomment=[l]{//s},
 \frontmatter %generates the frontmatter, this is FIXED
 
 \begin{abstract}
-This is a very abstract abstract. 
+In the last 10 years, Blockchains have become a fundamental component of several applications and services. The most common use is cryptocurrencies system, such as Bitcoin and Ethereum but their use cases can space also in notary and juridical area. As these systems become more and more popular, they require to be more performant and stable, qualities which they are struggling to meet. \\
+One of their most important and common building block is the gossip protocol used to exchange information between members of the system and the membership mechanism used to provide peers with a view of other participants. \\
+This thesis present Blockchain BAR Gossip, a protocol inspired by BAR Gossip, to exchange information in a blockchain context. BBAR Gossip is characterised by the fact that peer are accountable for their choices and can be punished if misbehaving. Moreover, we evaluate the protocol under more practical assumptions derived from the Byzantine Altruistic Rational model.
 \end{abstract}
 
 % \begin{abstract}[Zusammenfassung]
@@ -50,6 +52,11 @@ This is a very abstract abstract.
 %\end{abstract}
 
 \begin{acknowledgements}
+First off all I want to thank Prof. Fernando Pedone, for his guidance but, most of all, for keeping up with me for two thesis considering my awful english. \\
+I would also like to thank the experts who were involved in the development of the thesis, especially Zarko Milosevic. \\
+Further, I want also to thank  my parents for all the support during the last rollecostered five years. You are and always been there for me. \\
+Finally, I would like to thank all the people I have in the last 5 years with whom I have .... .
+
 \end{acknowledgements}
 
 \tableofcontents 
@@ -107,7 +114,6 @@ As more and more peers join the network to find a valid hash-puzzle, the difficu
 The second one, PoS, doesn't exploit any computationally hard puzzle but instead gives the possibility to any member of the network to 'stake' an amount of currency to be probabilistically assigned a chance to be the one validating the block. \\
 DPoS is similar to PoS but employs a more democratic system to choose the peer who will be validating the next block. The last one is PoA and works in a similar way to PoS. In fact, only a set of peers, called validators, are able, after reaching a supermajority, to add the next block to the chain. Validators are required to stake an amount of currency that will be slashed in case of misbehaviour. Moreover, their identity is public.
 
-
 \section{Gossip}
 Gossip protocols work by periodically exchanging information between members of the network. The exchange works in the following way: first, a peer selects randomly another peer in the system. Later, it contacts the peer and starts to share information with him based on a specific strategy. As peers are chosen randomly, this ensures that there will be a time T in which every peer knowns about every information. \\
 These kinds of protocols are usually compared to epidemic diseases as their mathematical proprieties are really similar. One of the main proprieties is the so-called spreading rate, which describes how many hosts get infected as a function of round and the number of infections per host:
@@ -162,15 +168,23 @@ If a system survives under the assumptions of the BAR model, it is said to be in
 Looking at the literature, several gossip protocol, assuming the BAR model, have already been studied. One of the most famous is the work done in \{ cite here BAR Gossip\}, which developed the first data streaming application with predictable throughput and low latency. \\
  In BAR Gossip a central tracker distributes updates to a subset of peers, who will then disseminate them with other members of the network in such a way that every peer's action is accountable and provable. As to our knowledge, there is no work on gossip protocols assuming a BAR model in a blockchain-context.
 \section{BAR Gossip in details}
-Is it worth to explain how BAR Gossip works? Maybe it can lead to easier explanation later.
+BAR Gossip is one of the first research on gossip protocols where peers follow the BAR model. It was mainly designed for streaming-context applications and provides a "fairly novel exchange" which avoids the needs of reputation system and improves the proprieties of the system in presence of rational or byzantine actors. \\
+BAR Gossip relies on a central tracker which distributes a particular number updates during an epoch and keep tracks of peers identity in the network. \\
+The two main components are the membership mechanism used to choose which peer to contact and the exchange protocol. \\
+The first one is based on a verifiable random function which output is used to deterministically and verifiably select the partner fo each epoch. \\
+The exchange protocol define how peers interact in order to share informations.
+BAR Gossip defines two exchange type: BAL and OPT. The first one is a Tic-For-Tac exchange meanwhile the second one is more a fallback for peer who are having troubles catching up. \\
+The main feature of the exchange protocol is that every message describe the action taken by the peer followed by a digital signature. This scheme allows the creation of Proof-of Misbehaviour, proofs that can be sent to the central tracker which will punish the Byzantine peer with the eviction. \\
+We will exploit these features into our protocol.
 \section{Problem definition}
-Is it worth adding this section to explain which are the problem and challenges of implementing BAR Gossip in a blockchain context?
-
+As we want to include the same membership mechanism and exchange protocol, we are faced with some problems. Blockchain network are by nature decentralize meanwhile BAR Gossip exploit a central tracker to distribute and keep tracks of peer. Moreover, peers in a blockchain network have different demands, with respect to streaming application, in term of data to exchange. \\
+In the net chapter will look at how we managed to overcome these challenges.
 
 \chapter{BBAR Gossip}
 After having discussed the needed background, we can now move onto describing our BBAR Gossip protocol.\\
  It is important to remember that the primary goal of the protocol is to implement a more reliable p2p network able to withstand or minimize the attack surfaces introduced by p2p protocols. This goal must be persuaded, taking into account that decentralization and convergence rate is a crucial factor in a blockchain network, meaning it could severely impact overall performances.\\
 This chapter will start describing the model assumption. It will then move to describe the several kinds of peers included in the network and their relationship. The last three sections will outline the actual protocol with a focus on implementation details and further optimizations.
+
 \section{Model assumptions}
 We are making the following assumption about our model:
 \begin{itemize}
@@ -187,17 +201,18 @@ We are making the following assumption about our model:
 Our model assumptions are compatible with most blockchain using PoS as consensus mechanism such as Tendermint.
 \section{Cryptographic primitives}
 In order to be able to make peers accountable for their actions, we need several kinds of cryptographic primitives: hash function, symmetric cryptography, asymmetric cryptography, and pseudo-random number generators. \\
-Hash functions are any function which can be used to map arbitrary length data onto fixed size data. Moreover, we need hashing function with two more additional proprieties:
+Hash functions are any function which can be used to map arbitrary length data onto fixed size data. Moreover, we need hashing function with three proprieties:
 \begin{itemize}
 	\item Pre-image resistance
 	\item Second-image resistance
 	\item Collision resistance
 \end{itemize}
+In addition to their normal use, we will exploit hash function to build cryptographic hash-based proof-of-work, as Hashcash. Hashcash PoW, are resource intensive to compute but easy to verify and provide a valid mechanism to limit spam attacks. \\
 The hashing function chosen in our implementation is SHA256, but other good candidates are SHA3 or BLAKE2. \\
-Symmetric encryption is an encryption mechanism that uses the same key to encrypt and decrypt some data. It is composed of an encryption algorithm, a decryption algorithm, the plain-text, the cipher-text, and a secret key. The encryption algorithm takes as parameters the plain-text and secret key and outputs the -cipher-text. The decryption algorithm takes as parameters the cipher-text and secret key and outputs the plain-text. The symmetric encryption algorithm chosen in our implementation is AES256, but Salsa20 or ChaCha are also good candidates. \\
+Symmetric encryption is an encryption mechanism that uses the same key to encrypt and decrypt some data. It is composed of an encryption algorithm, a decryption algorithm, the plain-text, the cipher-text, and a secret key. The encryption algorithm takes as parameters the plain-text and secret key and outputs the cipher-text. The decryption algorithm takes as parameters the cipher-text and secret key and outputs the plain-text. The symmetric encryption algorithm chosen in our implementation is AES256, but Salsa20 or ChaCha are also good candidates. \\
 Asymmetric encryption uses two key, one called private and one public, to either encrypt/decrypt or perform digital signatures. Digital signatures are a mathematical technique to validate the authenticity and integrity of a message and are usually used to acknowledge the consent of the signer.  \\
 Our implementation uses Elliptic Curve cryptography.
-Pseudo-random number generators are algorithms that deterministically generates a sequence of numbers whose properties approximate the properties of sequences of random numbers. PRNGs cannot be considered really random as their output is totally determined by an initial value called seed. Our implementation follows the Mersenne Twister PRNG, but the XORShift PNRG family is also a good candidate.
+Pseudo-random number generators are algorithms that deterministically generates a sequence of numbers whose properties approximate the properties of sequences of random numbers. PRNGs cannot be considered really random as their output is totally determined by an initial value called seed. Our implementation follows the Mersenne Twister PRNG, but the XORShift PNRG family is also a good candidate.
 \section{Type of peers}
 BBAR Gossip introduces two new different node types in the network along with the standard validator, full and seed node. It also modifies the default behaviour of seed node. \\
 The new nodes are called bootstrap and entry nodes. Each node has a particular role in the network. \\
@@ -225,7 +240,7 @@ We have divided the protocol into three phases, which a peer has to follow to st
 The first thing a peer has to do to be included in a network is to contact a seed node to receive some bootstrap's entry points addresses. From the list of addresses, the peer will randomly contact a subset of them and start the following message exchange.
 \begin{itemize}
 	\item Peer sends a HELLO message[\ref{tab:hello-message}] to the entry node/s, with his public-key and network address.
-	\item Entry node/s contact the Bootstrap node and send back a REGISTRATION message[\ref{tab:register-message}] , which includes a Hashcash-style puzzle and the corresponding difficulty.
+	\item Entry node/s contact the Bootstrap node and send back a REGISTRATION message[\ref{tab:register-message}], which includes a Hashcash-style puzzle and the corresponding difficulty.
 	\item As soon as the peer finds a solution for the crypto-puzzle, it sends to the entry node/s a LOGIN message[\ref{tab:login-message}], including the solution.
 	\item The entry node/s checks the validity of the solution. If the solution is valid, sends back a TOKEN message and includes the peer information in the next epoch. Together with a TOKEN message, a VIEW[\ref{tab:view-message}] message is also sent.
 \end{itemize}
@@ -649,6 +664,7 @@ The parameters of the tree simulation are the following:
 \label{tab:simulation-parameters-two}
 \end{table}
 
+The maximum mempoool size is 129 and the minimum is 6.
 Moreover, important factors in the simulation are the connectivity between bootstrap nodes and the number and distribution of node by their nature.
 
 \begin{figure}[!htb]
@@ -683,7 +699,7 @@ As we can see from figure \ref{fig:sim-one-init-distribution}, \ref{fig:sim-two-
 \end{figure}
 
 Moreover, from figure \ref{fig:connectivity-general}, we can also see that each bootstrap node has a connection with all the other bootstrap node meaning that the network is fully connected. This is a needed condition in order for the protocol to work. 
-
+\newpage
 \section{Convergences rate}
 The first propriety we want to analyze is the converge rate. 
 
@@ -837,8 +853,15 @@ Due to the fact that, on average, each peer completes 2 trades per epoch per boo
 We also want to point out that the a higher convergence rate could be archived by incresing the number of max update sharable in a BAL or OPT trade. Even if this is true, it would limit the fact that we want maximize the total number of BAL updates. Moreover, a less clustered network is more robust and reliable to synbil and eclipse attacks. 
 
 \chapter{Conclusion}
-\section{Discussion}
+Let us now summarize the report and draw the final conclusion. \\
+We started the first chapter by introducing where are gossip protocols used why they important, with a focus on blockchain systems. \\
+In the second chapter, we started a discussion on the background needed to understand the major challenges of this work, introducing the concepts of, blockchain, gossip protocols and BAR game theory model. \\
+ We then moved to the third chapter, where we described in details how BBAR Gossip work, from the description of the environment and network until the message exchanges. \\
+In the next two chapters we first evaluated our simulator using a prototype and then we used the simulator to better understand how our protocol behaves. From the test we have plotted several metrics which gave us some very interesting insights. \\
+In conclusion, we have been able to provide a gossip protocol for blockchains under that BAR model assumption adopting techniques derived from BAR Gossip.
 \section{Future works}
+Many improvements can be made to improve both the performance and reliability of BBAR Gossip. As we already described, sharing the entire history with the partner is a very resource wasting task and needs to be optimized by either share only a subset or by using some better, more suited data structures. \\
+Moreover, other improvements discussed in subsequent researches of BAR Gossip, such as erasure code as done in Flighpath, could be used to generally improve the system.
 
 \chapter{Glossary}
 
