@@ -516,7 +516,7 @@ The more straightforward way to decrease the size of the list would be to encode
 	\item Using a hash function with a smaller output such as RIPEMD-160.
 	\item Heuristically chose a subset of updates
 \end{itemize}
-A more sophisticated way to accomplish this task is to encode the updates into a more efficient data structure such as an Inverse Bloom Lookup Table or a Set Sketch. \\
+A more sophisticated way to accomplish this task is to encode the updates into a more efficient data structure such as an Invertible Bloom Lookup Table\citep{goodrich2011invertible} or a Set Sketch\citep{cryptoeprint:2003:235}.  \\
 Those kind of data structure are very efficient for set reconciliation tasks as they are able to encode data (in our case the identifiers) in a bloom filter fashion but with the added features that it is possible to recover the whole set of encoded data, and it is possible to perform the subtraction between two of them.
 
 \subsection{Message header}
