@@ -523,8 +523,6 @@ Those kind of data structure are very efficient for set reconciliation tasks as 
 The message header takes a non-trivial amount of bytes in each message. It is possible for each peer to send just the first message with the full header.\\ Meanwhile, the following messages could contain just a hash of it.
 
 \chapter{Evaluation}
-\section{BBAR vs BAR}
-I am not sure I will be able to plot the necessary data. Can i just explain the difference and similarity with BAR gossip?
 \section{Simulation vs Prototype}
 In order to evaluate our protocol we decided to implement both a prototype, with all the features described in the previous chapter, and a simulator, which is more scalable and easier to manage. \\
 We setup the prototype and simulator with the same parameters: 
