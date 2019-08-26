@@ -15,7 +15,7 @@ morecomment=[l]{//s},
 
 \title{Blockchain BAR Gossip} %compulsory
 \specialization{Financial Technology and Computing}%optional
-\subtitle{Accountable, deterministic and clustered Gossiping protocol} %optional 
+\subtitle{Accountable, deterministic and clustered gossip protocol} %optional 
 \author{Gianmarco Fraccaroli} %compulsory
 \begin{committee}
 \advisor{Prof.}{Fernando}{Pedone} %compulsory
@@ -67,80 +67,80 @@ Then, I would like to thank all the people I have met in the last five years. We
 \mainmatter
 
 \chapter{Introduction}
-During the last ten years, after the born of Bitcoin\citep{nakamoto2008bitcoin}, blockchain-based systems became an important building block in several applications, ranging from financial to legal services. As the need for this kind of distributed structured grew, more advanced and sophisticated versions have been built to meet real-world throughput demands. \\
+During the last ten years, after the birth of Bitcoin\citep{nakamoto2008bitcoin}, blockchain-based systems became an important building block in several applications, ranging from financial to legal services. As the need for this kind of distributed structure grew, more advanced and sophisticated versions have been built to meet real-world throughput demands. \\
 In fact, as the current Bitcoin protocol can handle only seven transactions per second, other protocols like Tendermint\citep{kwon2014tendermint} or Hyperledger can handle volumes of operations in the order of thousands per second. \\
 This is because the latter systems differ in the consensus mechanism, allowing for better performance and higher scalability at the cost of less decentralization. \\
-One of the aspects which is typical for most of those systems is the fact that they exchange information through a gossip protocol. Most of the time, this network can be freely joined by anyone, meaning that everyone receives and share updates on the state with other peers. 
-As receiving updates reliably and quickly is a key aspect for these kinds of protocols, the P2P network is a crucial aspect as it offers many advantages and disadvantages. \\
-Building a faster, safer, and more reliable gossip protocol for blockchains would improve the overall of those systems, making them closer to real-world scenarios needs.
+One of the aspects that is typical in most of those systems is the fact that they exchange information through a gossip protocol. Most of the time, the network can be freely joined by anyone, meaning that everyone receives and shares updates on the state with other peers. 
+As receiving updates reliably and quickly is a key aspect for these kind of protocols, the P2P network is a crucial aspect as it offers many advantages and disadvantages. \\
+Building a faster, safer, and more reliable gossip protocol for blockchains would overall improve those systems, making them closer to real-world scenarios needs.
 
 
 \section{Motivation}
-Blockchain systems offer an alternative way to settle an operation between two parties without having to rely on a trusted third party. The most famous and common example is the use of Bitcoin as a method of payments without having to rely on a bank or any other financial service. \\
+Blockchain systems offer an alternative way to settle an operation between two or more parties without having to rely on a trusted third party. The most famous and common example is the use of Bitcoin as a method of payment without having to rely on a bank or any other financial service. \\
 This is particularly useful because it is possible to decrease the costs associated with the service offered by the mediator and acquire a higher level of trust as the operations can be carried on just by the two (or more) persons involved in the exchange.  \\
-As we said before, due to the decentralized nature of these systems, gossip protocols, also called P2P, are heavily employed since they offer a high degree of scalability, fault-tolerance, robustness, fast-spreading and resilience, proprieties which are a perfect match for a decentralized system. \\
-Still, these protocols have their disadvantages. First of all, as anyone can join the network without any sort of registration, it is hard to account for their behaviour and punish it. Being not able to punish peers for their incorrect behaviour is even worse in cases where this is done on purpose leading to Sybil\citep{douceur2002sybil} or Eclipse\citep{singh2006eclipse} attacks (which are going to be discussed later on).\\
+As we said before, due to the decentralized nature of these systems, gossip protocols, sometimes called P2P, are heavily employed since they offer a high degree of scalability, fault-tolerance, robustness, fast-spreading and resilience, proprieties that are a perfect match for a decentralized system. \\
+Still, these protocols have their disadvantages. First of all, as anyone can join the network without any sort of registration, it is hard to account for their behaviour and punish misbehaviours. Being not able to punish peers for their incorrect behaviour is even worse in cases where this is done on purpose leading to Sybil\citep{douceur2002sybil} or Eclipse\citep{singh2006eclipse} attacks (which are going to be discussed later on).\\
 So, due to the crucial role of the gossip protocol in a blockchain system, we need to be able to ensure its correctness even in the presence of malicious peers.
 
 \section{Scope}
-Gossip protocols used in blockchain-context don't usually take into consideration malicious peer, or if they do, they generally use easy and simplistic countermeasures. 
-Since most of the blockchain networks are freely joinable by anyone, malicious peers can't be punished by the system in case of bad behavior as it is always possible for them to change identity and rejoin the system at zero cost.
-This thesis aims to find a way to account peers for their behavior, punishing those who either try to gain more benefits at the expense
-of other peers or try to slow or even disrupt the system. This goal has to be though in a context where gossip is a crucial aspect of the system, meaning that a slow, inefficient, or expensive protocol would have a significant impact on the overall performance.
+Gossip protocols used in a blockchain-context don't usually take into consideration malicious peer, or if they do, they generally use easy and simplistic countermeasures. 
+Since most of the blockchain networks are freely joinable by anyone, malicious peers can't be punished by the system in case of bad behaviour as it is always possible for them to change identity and rejoin the system at zero cost.
+This thesis aims to find a way to make peers accountable for their behaviour, punishing those who either try to gain more benefits at the expense
+of other peers or try to slow or even disrupt the system. This goal has to be thought in a context where gossip is a crucial aspect of the system, meaning that a slow, inefficient, or expensive protocol would have a significant impact on the overall performance.
 
 
 \section{Structure of the thesis}
-The remaining chapters are going to be structured in the following way. \\
-First of all, the next chapter will cover some key concept about blockchains, gossip protocols, and BAR model. \\
+The remaining chapters are structured in the following way. \\
+The second chapter will cover some key concepts about blockchains, gossip protocols, and BAR model. \\
 The third chapter will then discuss in detail the Blockchain BAR Gossip protocol in all his components, from the model assumption to the different phases. \\
-The fourth chapter and fifth chapter will be used to discussed the validity of the implementation of out prototyped simulation and on the experiments derived. \\
-Finally, in the last chapter draws the conclusions of this work, discussing some possible future works.
+The fourth and fifth chapters will discuss the validity of the implementation of our prototyped simulation and on the experiments derived. \\
+Finally, the last chapter draws the conclusions of this work, discussing some possible future works.
 
 \chapter{Background}
-This chapter will outline the concepts and structures related to this thesis in order to better understand the challenges and solutions of the BBAR protocol.
+This chapter outlines the concepts and structures related to this thesis in order to better understand the challenges and solutions of the BBAR protocol.
 
 \section{Blockchain}
-Blockchain is distributed systems composed of cryptographically linked blocks, where each block store information about the state up to that point in time. Participants in a blockchain network cooperate in order to agree and keep a copy of the common state. This state is often called ledger. \\
-Members of the network decide which state is correct by processing information through a common set of rules called consensus. Consensus rules goal is to agree on a common progression of blocks and prevent bad actors from altering it. \\
+Blockchains are distributed systems composed of cryptographically linked blocks, where each block store information about the state up to that point in time. Participants in a blockchain network cooperate in order to agree and keep a copy of the common state. This state is often called ledger. \\
+Members of the network decide which state is correct by processing information through a common set of rules called consensus. The goal of the consensus rules is to agree on a common progression of blocks and prevent bad actors from altering it. \\
 Blockchain systems are usually divided into three main groups: public blockchains (permissionless), consortium blockchains, and private blockchains (permissioned). \\
-The main difference between permissioned and permissionless blockchains is the fact that in the latter, everyone is welcome to be part of the network and take part in the core activities meanwhile the former present a central authority who is in charge of validating, writing information, and selecting who is able to read transactions.  \\
+The main difference between permissioned and permissionless blockchains is the fact that in the latter, everyone is welcome to be part of the network and take part in the core activities, while the former presents a central authority who is in charge of validating, writing information, and selecting who is able to read transactions.  \\
 Instead, consortium blockchains, also known as federated blockchain, are semi-public systems controlled by a group of members. They lie in the middle between public and private blockchains. \\
 This difference is of key importance for our work as peer identities are unknown in public blockchains and known in private blockchains. Instead, peer identities in federated blockchain are project dependent.
 
 \subsection{Consensus}
-As most of the features are common for most blockchain systems, what makes the great majority of them unique is the way they reach consensus. Briefly, it is possible to describe consensus mechanism as the set of rules which make sure that everyone agrees upon which information and state are correct. \\
-As we said before, there exist several types of consensus, with the most famous being: Proof of Work, Proof of Stake, Delegated Proof of Stake, and Proof of Authority.
+As most of the features are common for most blockchain systems, what makes the great majority of them unique is the way they reach consensus. Briefly, it is possible to describe consensus as the set of rules which make sure that everyone agrees upon which information and state are correct. \\
+As we said before, there exist several types of consensus, with the most famous being: Proof of Work (PoW), Proof of Stake (PoS), Delegated Proof of Stake (DPoS), and Proof of Authority (PoA).
 The first one, PoW, is used by Bitcoin and consists of a competition among peers in the network to find a solution to a cryptographic puzzle. These peers are called miners; the "solution" is called hash-puzzle. \\
-As more and more peers join the network to find a valid hash-puzzle, the difficulty of the puzzle increase. \\
+As more and more peers join the network to find a valid hash-puzzle, the difficulty of the puzzle increases. \\
 The second one, PoS, doesn't exploit any computationally hard puzzle but instead gives the possibility to any member of the network to 'stake' an amount of currency to be probabilistically assigned a chance to be the one validating the block. \\
-DPoS is similar to PoS but employs a more democratic system to choose the peer who will be validating the next block. The last one is PoA and works in a similar way to PoS. In fact, only a set of peers, called validators, are able, after reaching a supermajority, to add the next block to the chain. Validators are required to stake an amount of currency that will be slashed in case of misbehaviour. Moreover, their identity is public.
+DPoS is similar to PoS but employs a more democratic system to choose the peer who will be validating the next block. The last one is PoA and works in a similar way to PoS. In fact, only a set of peers, called validators, are able, after reaching a two-third majority, to add the next block to the chain. Validators are required to stake an amount of currency that will be slashed in case of misbehaviour. Moreover, their identity is public.
 
 \section{Gossip}
-Gossip protocols work by periodically exchanging information between members of the network. The exchange works in the following way: first, a peer selects randomly another peer in the system. Later, it contacts the peer and starts to share information with him based on a specific strategy. As peers are chosen randomly, this ensures that there will be a time T in which every peer knowns about every information. \\
-These kinds of protocols are usually compared to epidemic diseases as their mathematical proprieties are really similar. One of the main proprieties is the so-called spreading rate, which describes how many hosts get infected as a function of round and the number of infections per host:
+Gossip protocols work by periodically exchanging information between members of the network. The exchange works in the following way: first, a peer selects randomly another peer in the system. Later, it contacts the peer and starts to share information with it based on a specific strategy. As peers are chosen randomly, this ensures that there will be a time T in which every peer knowns about all information. \\
+These kinds of protocols are usually compared to epidemic diseases as their mathematical proprieties are similar. One of the main proprieties is the so-called spreading rate, which describes how many hosts get infected as a function of the communication round and the number of infections per host:
 $$Y_r = \frac{1}{1 + ne^{-f}r}$$
-where $r$ is the round, f is the number a host will infect each round, $Y_r$ is the number of infected hosts in round $r$. Basically, the convergence rate of a gossip protocol is based on how many exchanges he can execute each round and the number of rounds with an increase factor of $e^f$ per round. \\
-Benefits of gossip protocols are:
+where $r$ is the round, $f$ is the number of host a peer can infect, $Y_r$ is the number of infected hosts in round $r$. Basically, the convergence rate of a gossip protocol is based on how many exchanges it can execute in each round and the number of rounds with an increase factor of $e^f$ per round. \\
+The benefits of gossip protocols are:
 \begin{itemize}
-	\item High scalability, as messages need on average $\log(N)$ round to reach every node and node need to send a constant amount of messages independently from the size of the network.
-	\item Fault tolerance, since nodes connectivity and irregularities in their behaviour, can be tolerated up to a certain level. Moreover, the same information can be provided by different peers meaning that there is a certain level of redundancy.
+	\item High scalability, as messages need on average $\log(N)$ rounds, where $N$ is the number of peer in the network, to reach every node and nodes need to send a constant amount of messages independently from the size of the network.
+	\item Fault tolerance, since nodes connectivity and irregularities in their behaviour can be tolerated up to a certain level. Moreover, the same information can be provided by different peers meaning that there is a certain level of redundancy.
 	\item High convergence rate, as we have seen above,  peers reach a global state exponentially quickly.
 	\item Simplicity, as every node runs the same code.
 	\item Resilience, as there are exponentially many routes by which information can flow from its source to its destinations.
 \end{itemize}
 \newpage
-Still, gossip protocols have also his disadvantages:
+Still, gossip protocols also have his disadvantages:
 \begin{itemize}
 	\item Fragile with malicious peers, as many attacks can be carried on a gossip protocol that would break the whole system.
 	\item Message size limits the scalability of the system, meaning that if information cannot be encoded into a single message, it will require another round of spreading, decreasing the overall scalability.
 \end{itemize}
-\subsection{Type of gossip protocols}
-There exist several kinds of gossip protocol strategies, but most of them are based on the concepts of pull and pull. \\
-In push-based strategies, as soon as a node receives a new update, it randomly selects a peer and sends the full payload. This strategy can be further divided into "eager" or "lazy" pull. The lazy version of push-based gossip differs because a node, instead of directly sending the full payload, sends an identifier (such as a hash). The partner will then respond if he wants or not the full payload. \\
-Instead, in pull-based strategies, a node randomly selects a peer in the network and ask for recently or available information. Upon receiving that list, they exchange missing information by directly asking the partner for them. \\
-Selecting the best strategy is a matter of trade-off: push-based strategies archive a better convergence rate (as they require one less message exchange w.r.t the other strategies) but also produce more redundant data, meaning a higher waste of bandwidth and resources.
+\subsection{Types of gossip protocols}
+There exist several kinds of gossip protocol strategies, but most of them are based on the concepts of push and pull. \\
+In push-based strategies, as soon as a node receives a new update, it randomly selects a peer and sends the full payload. This strategy can be further divided into "eager" or "lazy" pull. The lazy version of push-based gossip differs because a node, instead of directly sending the full payload, sends an identifier (such as a hash). The partner will then respond if it wants or not the full payload. \\
+Instead, in pull-based strategies, a node randomly selects a peer in the network and asks for recently or available information. Upon receiving that list, they exchange missing information by directly asking the partner for them. \\
+Selecting the best strategy is a matter of a trade-off: push-based strategies achive a better convergence rate (as they require one fewer message exchange w.r.t the other strategies) but also produce more redundant data, meaning a higher waste of bandwidth and resources.
 There is also the possibility to combine the strategies mentioned above to create more efficient but more complex protocols. \\
-One example of such strategy is the eager push and pull, which is characterized by the fact that gossiping is divided into 2 phases: a first one where peers exchange information through a push-based strategy and a second where a pull-based method is used in order to minimize redundant data. \\
+One example of such a strategy is the eager push and pull, which is characterized by the fact that gossiping is divided into 2 phases: a first one where peers exchange information through a push-based strategy and a second where a pull-based method is used in order to minimize redundant data. \\
 Gossip protocols are also characterized by how they manage the membership of the network, as each peer can maintain a full-view or a partial-view of the network and structure of the network, as peers can be organized in tree or circle based shape. % TODO: EXPAND
 
 \subsection{Gossip threats}
