@@ -55,7 +55,7 @@ This thesis present Blockchain BAR Gossip, a protocol inspired by BAR Gossip, to
 First off all I want to thank Prof. Fernando Pedone, for his guidance but, most of all, for keeping up with me for two thesis considering my awful english. \\
 I would also like to thank the experts who were involved in the development of the thesis, especially Zarko Milosevic. \\
 Further, I want also to thank  my parents for all the support during the last rollecostered five years. You are and always been there for me. \\
-Then, I would like to thank all the people I have met in the last five years. We shared some good and bad memories which I will forever keep tight. \\
+Last, but not least, I would like to thank all the people I have met in the last five years. You guys rock (sometime).
 %Last, but not least, a special thank goes to P. who made me realize how many things I was missing in life. 
 
 \end{acknowledgements}
@@ -141,36 +141,36 @@ Instead, in pull-based strategies, a node randomly selects a peer in the network
 Selecting the best strategy is a matter of a trade-off: push-based strategies achive a better convergence rate (as they require one fewer message exchange w.r.t the other strategies) but also produce more redundant data, meaning a higher waste of bandwidth and resources.
 There is also the possibility to combine the strategies mentioned above to create more efficient but more complex protocols. \\
 One example of such a strategy is the eager push and pull, which is characterized by the fact that gossiping is divided into 2 phases: a first one where peers exchange information through a push-based strategy and a second where a pull-based method is used in order to minimize redundant data. \\
-Gossip protocols are also characterized by how they manage the membership of the network, as each peer can maintain a full-view or a partial-view of the network and structure of the network, as peers can be organized in tree or circle based shape. % TODO: EXPAND
+Gossip protocols are also characterized by how they manage the membership of the network, as each peer can maintain a full-view or a partial-view of the network and structure of the network, as peers can be organized in tree or circle based shape. 
 
 \subsection{Gossip threats}
-Peer in a blockchain network does not usually need to be registrered as no PKI infrastructure exists. This fact is perfect to increase the level of decentralization, but it also introduces no way of punishing a misbehaving peer, as he can easily change his identity.
+Peers in a blockchain network does not usually need to be pursue any registration as no PKI infrastructure exists. This fact is perfect to increase the level of decentralization, but it also introduces no way of punishing a misbehaving peer, as he can easily change his identity.
 The most dangerous attacks on this kind of p2p networks are rational attacks, Sybil attack, and Eclipse attacks. \\
-The first one includes all those scenarios where a peer acts selfishly the increasing the load of other more altruistic peers. An example is a peer who always asks for updates without sharing anything, minimizing the use of his resources and maximizing his gain. \\
-A Sybil attack is a kind of security threat where one person tries to take over the network by creating multiple identities. In a blockchain-context, a malicious actor could create a high number of nodes polluting most of the network's view of other peers. This scenario could lead to a bad situation where most fo peer would not be able to receive or transmit information. \\
+The first one includes all those scenarios where a peer acts selfishly, increasing the load of other more altruistic peers. An example is a peer who always asks for updates without sharing anything, minimizing the use of his resources and maximizing his gain. \\
+A Sybil attack is a kind of security threat where one person tries to take over the network by creating multiple identities. In a blockchain-context, a malicious actor could create a high number of nodes polluting most of the network's view of other peers. This scenario could lead to a bad situation where most of the peers would not be able to receive or transmit information. \\
 Eclipse attacks are a more powerful Sybil attack where an attacker is able to pollute the whole network view of a peer, meaning that the victim cannot understand whether the information he receives is correct or not.
 \subsection{Gossip in blockchains}
-As of 2019, many blockchains were born, each one providing different services, ranging from financial to juridical and gossip protocol. Most of the time, the p2p network is used to propagate messaging containing blocks or transactions, but there are also examples of blockchain which use gossip to disseminate message for consensus purposes.\\
-The most famous and most used blockchain is Bitcoin. In the Bitcoin p2p network, peers maintain a routing table containing the connection information of all the peers they have known about until that time. Every $\Delta$ time $T$, a subset of peers is chosen to start exchange messages using a lazy push-based strategy. Another relevant blockchain is Ethereum\citep{wood2014ethereum}, which gossip protocol is pretty similar to Bitcoin's. One relevant fact about Ethereum's p2p protocol is the fact that it has been found vulnerable to an eclipse attack in 2015 and since then a new peer sampling mechanism has been added to remove the issue. \\
+As of 2019, many blockchains were born, each one providing different services, ranging from financial to juridical and using different gossip protocol. Most of the time, the p2p network is used to propagate messaging containing blocks or transactions, but there are also examples of blockchains which use gossip to disseminate messages for consensus purposes.\\
+The most famous and most used blockchain is Bitcoin. In the Bitcoin p2p network, peers maintain a routing table containing the connection information of all the peers they have known about until that time. Every $\Delta$ time $T$, a subset of peers is chosen to start exchange messages using a lazy push-based strategy. Another relevant blockchain is Ethereum\citep{wood2014ethereum}, which gossip protocol is pretty similar to Bitcoin's. One relevant fact about Ethereum's p2p protocol is the fact that it has been found vulnerable to an eclipse attack\citep{wust2016ethereum} in 2016 and since then a new peer sampling mechanism has been added to remove the issue. \\
 Looking at less decentralized blockchain, we have Hyperledger Fabric which divides gossip into push-based and pull-based times. Another one of this kind is Tendermint, which instead follows an eager push-based strategy. Tendermint exploits also gossip to disseminate consensus messages between validators.
 
 \section{BAR model \& BAR Gossip}
-Traditionally, fault-tolerance theory admits three different models to describe actor's behaviors, determining how much the system can withstand part of it deviating from the protocol. \\
-The first model is the simple fault-tolerance, where the idea is that each actor can either precisely follow the protocol or fail, meaning that the system has to be able to detect and recover from failures. This model is most useful in those scenarios where the system is architecturally decentralized but politically centralized (ex. Google cloud hosting). \\
-However, what if the considered system is managed by several organizations or individuals? In this case, the model has to in exchange for the Byzantine fault-tolerance, which states that most of the nodes will follow the protocol, but some of them will deviate either by acting maliciously or because they crash/fail. Byzantine fault-tolerance systems need to survive against a percentage of such deviating members. \\
-The last, more realistic and complex model extends the notion of Byzantine fault-tolerance, is called Byzantine Altruistic Rational model an differs from the previous one by adding a simple reasoning: considering a real-life scenario, every actor's behavior in a system is determined by the incentives he gets when following the protocol. Most members of the system will always try to maximize their utility function even if this requires to deviate from the protocol. A simple example are push and pull forms of gossip: as peers are obligated to exchange information in a Tic-For-Tac fashion, they can ask for updates and never sharing them, increasing the load burden on a smaller subset of peers. \\
-This is way BAR model assumes three types of actors:
+Traditionally, fault-tolerance theory admits three different models to describe actor's behaviours, determining how much the system can withstand part of it deviating from the protocol. \\
+The first model is the simple fault-tolerance, where the idea is that each actor can either precisely follow the protocol or fail, meaning that the system has to be able to detect and recover from crashes and failures. This model is most useful in those scenarios where the system is architecturally decentralized but politically centralized (ex. Google cloud hosting). \\
+However, what if the considered system is managed by several organizations or individuals? In this case, the model has to be exchanged for the Byzantine fault-tolerance, which states that most of the nodes will follow the protocol, but some of them will deviate either by acting maliciously or because they crash/fail. Byzantine fault-tolerance systems need to survive against a percentage of such byzantine members. \\
+The last, more realistic and complex model extends the notion of Byzantine fault-tolerance; is called Byzantine Altruistic Rational model an differs from the former by adding a simple reasoning: considering a real-life scenario, every actor's behaviour in a system is determined by the incentives he gets when following the protocol. Most members of the system will always try to maximize their utility function even if this requires to deviate from the protocol. A simple example are push and pull forms of gossip: as peers are not obligated to exchange information in a Tic-For-Tac fashion, they can ask for updates and never share them, increasing the burden on a smaller subset of peers. \\
+The BAR model assumes three types of actors:
 \begin{itemize}
 	\item Altruistic: actors who always follow the protocol.
 	\item Rationals: actors who follow the protocol if it suits them, and do not follow the protocol if it does not.
 	\item Byzantine: actors who only want to disrupt the system.
 \end{itemize}
 If a system survives under the assumptions of the BAR model, it is said to be incentive-compatible. \\
-Looking at the literature, several gossip protocol, assuming the BAR model, have already been studied. One of the most famous is the work done in \{ cite here BAR Gossip\}, which developed the first data streaming application with predictable throughput and low latency. \\
- In BAR Gossip a central tracker distributes updates to a subset of peers, who will then disseminate them with other members of the network in such a way that every peer's action is accountable and provable. As to our knowledge, there is no work on gossip protocols assuming a BAR model in a blockchain-context.
+Looking at the literature, several gossip protocol, assuming the BAR model, have already been studied. One of the most famous is the work done in BAR Gossip\citep{li2006bar}, which developed the first data streaming application with predictable throughput and low latency. \\
+ In BAR Gossip a central tracker distributes updates to a subset of peers, who will then disseminate them with other members of the network in such a way that every peer action is accountable and provable. As to our knowledge, there is no work on gossip protocols assuming a BAR model in a blockchain-context.
 \section{BAR Gossip in details}
-BAR Gossip is one of the first research on gossip protocols where peers follow the BAR model. It was mainly designed for streaming-context applications and provides a "fairly novel exchange" which avoids the needs of reputation system and improves the proprieties of the system in presence of rational or byzantine actors. \\
-BAR Gossip relies on a central tracker which distributes a particular number updates during an epoch and keep tracks of peers identity in the network. \\
+BAR Gossip is one of the first research on gossip protocols where peers follow the BAR model. It was mainly designed for streaming-context applications and provides a "fairly novel exchange" which avoids the needs of reputation systems and improves the proprieties of the network in presence of rational or byzantine actors. \\
+BAR Gossip relies on a central tracker which distributes a some updates during an epoch and keep tracks of peers identity in the network. \\
 The two main components are the membership mechanism used to choose which peer to contact and the exchange protocol. \\
 The first one is based on a verifiable random function which output is used to deterministically and verifiably select the partner fo each epoch. \\
 The exchange protocol define how peers interact in order to share informations.
@@ -178,59 +178,59 @@ BAR Gossip defines two exchange type: BAL and OPT. The first one is a Tic-For-Ta
 The main feature of the exchange protocol is that every message describe the action taken by the peer followed by a digital signature. This scheme allows the creation of Proof-of Misbehaviour, proofs that can be sent to the central tracker which will punish the Byzantine peer with the eviction. \\
 We will exploit these features into our protocol.
 \section{Problem definition}
-As we want to include the same membership mechanism and exchange protocol, we are faced with some problems. Blockchain network are by nature decentralize meanwhile BAR Gossip exploit a central tracker to distribute and keep tracks of peer. Moreover, peers in a blockchain network have different demands, with respect to streaming application, in term of data to exchange. \\
-In the net chapter will look at how we managed to overcome these challenges.
+As we want to include the same membership mechanism and exchange protocol, we are faced with some problems. Blockchain network are by nature decentralized, but BAR Gossip exploits a central tracker to distribute and keep tracks of peer. Moreover, peers in a blockchain network have different demands, with respect to streaming application, in term of data to exchange. \\
+In the next chapter we look at how we managed to overcome these challenges.
 
 \chapter{BBAR Gossip}
 After having discussed the needed background, we can now move onto describing our BBAR Gossip protocol.\\
- It is important to remember that the primary goal of the protocol is to implement a more reliable p2p network able to withstand or minimize the attack surfaces introduced by p2p protocols. This goal must be persuaded, taking into account that decentralization and convergence rate is a crucial factor in a blockchain network, meaning it could severely impact overall performances.\\
-This chapter will start describing the model assumption. It will then move to describe the several kinds of peers included in the network and their relationship. The last three sections will outline the actual protocol with a focus on implementation details and further optimizations.
+ It is important to remember that the primary goal of the protocol is to implement a more reliable p2p network able to withstand or minimize the attack surfaces introduced by p2p protocols. This goal must be persuaded, taking into account that decentralization and convergence rate are crucial factors in a blockchain network, meaning it could severely impact overall performances.\\
+This chapter starts describing the model assumptions. It then moves to describe the several kinds of peers in the network and their relationship. The last three sections outlines the actual protocol with a focus on implementation details and further optimizations.
 
 \section{Model assumptions}
-We are making the following assumption about our model:
+The model we are using makes the following assumptions:
 \begin{itemize}
 	\item The p2p network is not built upon any structure.
 	\item Every peer in the network adheres to the BAR model.
-	\item There exist two kinds of peers: validator and full node.
+	\item There exist two kinds of peers: validators and full nodes.
 	\item Validators are block producers and can get punished for misbehaving.
 	\item Validators do not know each other. If they need to talk, they do it by gossiping.
 	\item Validators are also full nodes and are not recognizable by other peers.
 	\item Identities of Validators are known and bound to a Public Key, but their network address is hidden and unknown.
 	\item Full nodes keep track of network operations and can generate Proof-of-Misbehavior against malicious peers.
-	\item There exist seed-nodes, which a newly joined peer can contact to receive an initial set of peer addresses.
+	\item There exist seed nodes, which a newly joined peer can contact to receive an initial set of peer addresses.
 \end{itemize}
 Our model assumptions are compatible with most blockchain using PoS as consensus mechanism such as Tendermint.
 \section{Cryptographic primitives}
 In order to be able to make peers accountable for their actions, we need several kinds of cryptographic primitives: hash function, symmetric cryptography, asymmetric cryptography, and pseudo-random number generators. \\
-Hash functions are any function which can be used to map arbitrary length data onto fixed size data. Moreover, we need hashing function with three proprieties:
+Hash functions are any function which can be used to map arbitrary length data onto fixed size data. We need hashing function with three proprieties:
 \begin{itemize}
-	\item Pre-image resistance
-	\item Second-image resistance
-	\item Collision resistance
+	\item Pre-image resistance: given a hash value $h$ it should be difficult to find any message $m$ such that $h = hash(m)$.
+	\item Second-image resistance: given an input $m1$, it should be difficult to find a different input $m2$ such that $hash(m1) = hash(m2)$
+	\item Collision resistance: it should be difficult to find two different messages $m1$ and $m2$ such that $hash(m1) = hash(m2)$.
 \end{itemize}
-In addition to their normal use, we will exploit hash function to build cryptographic hash-based proof-of-work, as Hashcash\citep{back2002hashcash}. Hashcash PoW, are resource intensive to compute but easy to verify and provide a valid mechanism to limit spam attacks. \\
+In addition to their normal use, we will exploit hash function to build cryptographic hash-based proof-of-work, as Hashcash\citep{back2002hashcash}. Hashcash PoWs, are resource intensive to compute but easy to verify and provide a valid mechanism to limit spam attacks. \\
 The hashing function chosen in our implementation is SHA256, but other good candidates are SHA3 or BLAKE2. \\
 Symmetric encryption is an encryption mechanism that uses the same key to encrypt and decrypt some data. It is composed of an encryption algorithm, a decryption algorithm, the plain-text, the cipher-text, and a secret key. The encryption algorithm takes as parameters the plain-text and secret key and outputs the cipher-text. The decryption algorithm takes as parameters the cipher-text and secret key and outputs the plain-text. The symmetric encryption algorithm chosen in our implementation is AES256, but Salsa20 or ChaCha are also good candidates. \\
-Asymmetric encryption uses two key, one called private and one public, to either encrypt/decrypt or perform digital signatures. Digital signatures are a mathematical technique to validate the authenticity and integrity of a message and are usually used to acknowledge the consent of the signer.  \\
+Asymmetric encryption uses two key, one called private and one public, to either encrypt/decrypt or perform digital signatures. Digital signatures are a mathematical technique to validate the authenticity and integrity of a message and are commonly used to acknowledge the consent of the signer.  \\
 Our implementation uses Elliptic Curve cryptography.
-Pseudo-random number generators are algorithms that deterministically generates a sequence of numbers whose properties approximate the properties of sequences of random numbers. PRNGs cannot be considered really random as their output is totally determined by an initial value called seed. Our implementation follows the Mersenne Twister PRNG, but the XORShift PNRG family is also a good candidate.
+Pseudo-random number generators are algorithms that deterministically generates a sequence of numbers whose properties approximate the properties of random number sequences. PRNGs cannot be considered really random as their output is totally determined by an initial value called seed. Our implementation follows the Mersenne Twister PRNG, but the XORShift PRNG family is also a good candidate.
 \section{Type of peers}
-BBAR Gossip introduces two new different node types in the network along with the standard validator, full and seed node. It also modifies the default behaviour of seed node. \\
-The new nodes are called bootstrap and entry nodes. Each node has a particular role in the network. \\
+BBAR Gossip introduces two new different node types in the network along with the standard validator, full and seed node. It also modifies the default behaviour of seed node.
+The new nodes are called bootstrap and entry nodes. \\Each node has a particular role in the network:
 \begin{itemize}
-	\item Bootstrap nodes are the main difference with traditional gossips. Its primary purpose is to register and keep track of new peers, remove malicious peer, and coordinate the exchange of messages. Each Bootstrap node identity is tied to a corresponding validator's identity as they can be made accountable for their actions and, in case of misbehaviour, be slashed.
-	\item Entry nodes are an additional component of every bootstrap node. They act as reverse proxies to keep the network identity (IP address) of the bootstrap node hidden to avoid DDoS attacks.
+	\item Bootstrap nodes are the main difference with traditional gossips. Their primary purpose is to register and keep track of new peers, remove malicious peer, and coordinate the exchange of messages. Each Bootstrap node identity is tied to a corresponding validator's identity as they can be made accountable for their actions and, in case of misbehaviour, be slashed.
+	\item Entry nodes are an additional component of every bootstrap node. They act as reverse proxies to keep the network identity (IP address) of the bootstrap node hidden to avoid DDoS related attacks.
 	\item Full nodes are simple peers in the network who want to exchange messages with other peers to sync their state. They have different behaviour as they agree to the BAR model.
-	\item Seeds node keep track of bootstrap node's addresses as new peers need to be able to contact a bootstrap node to start interacting with the network.
+	\item Seeds node keep track of Bootstrap node's addresses as new peers need to be able to contact a bootstrap node to start interacting with the network.
 \end{itemize}
 
 \section{Protocol description}
-We have divided the protocol into three phases, which a peer has to follow to start exchanging messages and sync his state. 
+We have divided the protocol into three phases, that a peer has to follow to start exchanging messages and sync his state. 
 \subsection{Epoch concept}
 A cardinal concept and crucial building block of the protocol is the notion of Epoch.  \\
 An epoch is a $\Delta$ $T$ time used to divide time and synchronize peers, and each Bootstrap node decides how long an epoch last. Epochs have to be a monotonically increasing sequence of numbers and must not overlap.
 \subsection{Registraton phase}
-We have divided the protocol into three phases, which a peer has to follow to start exchanging messages and sync his state. 
+The first thing a peer has to do to be included in a network is to contact a Seed node to receive some Bootstrap's node entry node addresses. From the list of addresses, the peer will randomly contact a subset of them and start the following message exchange.
 
 \begin{figure}[h]
   \includegraphics[width=\linewidth]{images/register-phase.png}
@@ -238,18 +238,16 @@ We have divided the protocol into three phases, which a peer has to follow to st
   \label{fig:register-flow}
 \end{figure}
 
-The first thing a peer has to do to be included in a network is to contact a seed node to receive some bootstrap's entry points addresses. From the list of addresses, the peer will randomly contact a subset of them and start the following message exchange.
 \begin{itemize}
 	\item Peer sends a HELLO message[\ref{tab:hello-message}] to the entry node/s, with his public-key and network address.
 	\item Entry node/s contact the Bootstrap node and send back a REGISTRATION message[\ref{tab:register-message}], which includes a Hashcash-style puzzle and the corresponding difficulty.
-	\item As soon as the peer finds a solution for the crypto-puzzle, it sends to the entry node/s a LOGIN message[\ref{tab:login-message}], including the solution.
+	\item As soon as the peer finds a solution for the crypto-puzzle, it sends to the entry node/s a LOGIN message[\ref{tab:login-message}] with the solution.
 	\item The entry node/s checks the validity of the solution. If the solution is valid, sends back a TOKEN message and includes the peer information in the next epoch. Together with a TOKEN message, a VIEW[\ref{tab:view-message}] message is also sent.
 \end{itemize}
   
 Each bootstrap node can choose the difficulty of the desired solution, meaning that they can control how many registrations they get on average in the next $T$ epochs.\\
-In the last step, after checking that the solution is valid, the entry nodes returns a TOKEN message. The TOKEN message contains a digital signature over the hash of the string generated as the concatenation of the crypto-puzzle, the corresponding solution, and epoch. It is possible for everyone, using this format, to check the validity of the Hashcash solution, (to avoid collusion between the bootstrap node and a peer) and bind the token to a specific epoch. Moreover, the TOKEN message, includes a field called Key, which stores 16 random bytes which will be used later in the protocol. \\
-Still in the last step, the entry nodes sends also a VIEW message which contains a list of all the registered peers with their informations and the next epoch 
-time. \\
+In the last step, after checking that the solution is valid, the entry nodes returns a TOKEN message. The TOKEN message contains a digital signature over the hash of the string generated as the concatenation of the crypto-puzzle, the corresponding solution, and epoch. It is possible for everyone, using this format, to check the validity of the Hashcash solution, (to avoid collusion between a Bootstrap node and a peer) and binds the token to a specific epoch. Moreover, the TOKEN message, includes a field called Key, which stores 16 random bytes which will be used later in the protocol. \\
+Still in the last step, the entry nodes sends also a VIEW message which contains a list of all the registered peers with their informations and the next epoch start time. \\
 When the next epoch start, every peer in the network has to send back their token to the corresponding Bootstrap node. If the Bootstrap node does not have any PoM against that peer, it will send back a new TOKEN and VIEW message.
 
 \begin{table}[H]
@@ -332,7 +330,7 @@ When the next epoch start, every peer in the network has to send back their toke
 
 \subsection{Peer selection phase}
 As soon a the registration phase is over, a peer should have received a valid token from the TOKEN message and a list of peers he can contact from the VIEW message. \\
-Instead of randomly selecting a peer in the peer list, the selection is computed using a PNRG seeded with the token received. The output of the PNRG modulus the size of the peer list will generate the index of the selected partner in the list. \\ If the index number is the peer itself, it generates another random number using the same PRNG, until a valid one comes out.
+Instead of randomly selecting a peer in the peer list, the selection is computed using a PNRG seeded with the token received. The output of the PNRG modulus the size of the peer list will generate the index of the selected partner in the list. \\ If the index number is the peer itself, it generates the next random number using the same PRNG, until a valid one comes out. \\
 Using this mechanism, we can make peers accountable for peer-selection and create PoMs in case of misbehaviour. 
 
 \subsection{Exchange phase}
@@ -346,23 +344,22 @@ The last phase, called Exchange phase, is heavily inspired by BAR Gossip and exp
 \end{figure}
 
 As soon as a peer determined who has to contact, the protocol follows these steps:
-As soon as a peer determined who has to contact, the protocol follows these steps:
 \begin{itemize}
 	\item A CONNECTIONREQUEST[\ref{tab:connectionrequest-bar-message}] message is sent to the selected partner.
 	\item After validating the connection, the partner sends back a HISTORYDIVULGE[\ref{tab:historydivulge-bar-message}] message, informing the peer that he has accepted his request and giving him the details about his mempool/state as a list of hash identifiers.
-	\item On receiving the HISTORYDIVULGE message, the peer computes the set difference with his mempool/state. Based on those results, it decided if his best choice is a BAR or OPT exchange and sends to his partner an EXCHANGE[\ref{tab:exchange-bar-message}] message containing a list of updates he wants, he will give back and the exchange type to perform.
-	\item The partner checks if the exchange is valid (it will be explained later what it means), and sends back a PROMISE[\ref{tab:promise-bar-message}] message, which affirms the fact that he accepted the exchange, and a BRIEFCASE message, which contains the updates encrypted.
+	\item On receiving the HISTORYDIVULGE message, the peer computes the set difference with his mempool/state. Based on those results, it decided if his best choice is a BAR or OPT exchange and sends to his partner an EXCHANGE[\ref{tab:exchange-bar-message}] message containing the exchange type to perform and a list of updates he wants and promise.
+	\item The partner checks if the exchange is valid (it will be explained later what it means), and sends back a PROMISE[\ref{tab:promise-bar-message}] message, which state the fact that he accepted the exchange, and a BRIEFCASE message, which contains the updates encrypted.
 	\item Upon receiving a valid PROMISED message, the peer also sends to his partner a BRIEFCASE[\ref{tab:briefcase-bar-message}] message.
 	\item Upon receiving a BRIEFCASE message, both peers will start sending a KEYREQUEST[\ref{tab:keyrequest-bar-message}] message to the partner, until either the epoch finish or until a KEY message arrives.
-	\item The KEY[\ref{tab:key-bar-message}] message includes the secret to open the corresponding briefcase, containing the requested updates.
+	\item The KEY[\ref{tab:key-bar-message}] message includes the secret key to open the corresponding briefcase, containing the requested updates.
 \end{itemize}
 
-First of all, each message sent during this phase contains a header containing the token plus relative information to verify his validity and a hash of the previous message, so that it is possible to rebuild the message history. \\
-A crucial aspect of the protocol, which is heavily inspired by BAR Gossip\citep{li2006bar}, are the two types of exchanges available: BAL or OPT. A BAL exchange is characterized by the fact each member of the trade promised to exchange the same number of updates, in a TicForTat fashion. As this is not always possible, OPT provided a safe-net mechanism for peers who do not have something to exchange, and they rely on the altruism of other peers. In fact, a peer A who starts an OPT exchange, promises to the other 0 or more updates and asks the partner to send back either the same number of updates as him or more. Moreover, the number of updates exchange during each trade is bounded both for BAL and OPT, as this increase the possibility for a peer to start a BAL exchange. \\
-As we want to incentivize the more fair BAL exchange, partner B will add a percentage of random data to the BRIEFCASE message.  \\
-A fundamental difference with BAR Gossip is the fact that the peer sending the CONNECTIONREQUEST message, is the one choosing the type of exchange.  \\
+First of all, each message sent during this phase contains a header with the token plus the relative information to verify his validity and a hash of the previous message, so that it is possible to rebuild the message history. \\
+A crucial aspect of the protocol, which is heavily inspired by BAR Gossip, are the two types of exchanges available: BAL or OPT. A BAL exchange is characterized by the fact each member of the trade promised to exchange the same number of updates, in a Tic-For-Tat fashion. As this is not always possible, OPT provided a safe-net mechanism for peers who do not have something to exchange, and they rely on the altruism of other peers. In fact, a peer A who starts an OPT exchange, promises to the other 0 or more updates and asks the partner to send back either the same number of updates as him or more. 
+Mooreover, as we want to incentivize the more fair BAL exchange, partner B will add a percentage of random data to the BRIEFCASE message.  \\
+Another fact is that the maximum number of sharable updates in each trade is bounded both for BAL and OPT, as this increase the possibility for a peer to start a BAL exchange. \\
 The Briefcase message is encrypted using a symmetric encryption algorithm where the secret key is received by the Bootstrap node in the TOKEN message. \\
-As in BAR Gossip, all messages are sent through TCP connection expect the KEYREQUEST and KEY message.
+Last, but not least, as in BAR Gossip, all messages are sent through TCP connection expect the KEYREQUEST and KEY message, which are sent via UDP.
 
 \begin{table}[H]
 \centering
@@ -486,10 +483,10 @@ As in BAR Gossip, all messages are sent through TCP connection expect the KEYREQ
 \section{Details}
 \subsection{Proof-of-Misbehavior}
 The idea behind PoMs is to have a mechanism to prove that a member of the network tried to deviate from the protocol. In our protocol (as well as in BAR gossip) this is accomplished through the use of cryptography: digital signatures and hash functions are combined to keep each peer accountable.\\
- As soon as a peer misbehaves, the partner can use generate a PoM and send it to the corresponding Bootstrap node, who will schedule an eviction in the next epoch.
+ As soon as a peer misbehaves, the partner can generate a PoM and send it to the corresponding Bootstrap node, who will schedule an eviction for the next epoch.
 
 \subsection{Shuffle peer list each epoch}
-A Bootstrap node could collude with a peer to particularly craft the order peer list in such a way that a peer always contacts the same subset of peers. Due to this issue, the peer list has to be shuffled in a random but verifiable way.  An option which we have used in our implementation to accomplish this task is the following:
+A Bootstrap node could collude with a peer to particularly build the order of the peer list in such a way that a peer always contacts the same subset of peers. Due to this issue, the peer list has to be shuffled in a random but verifiable way.  An option, which we have used in our implementation to accomplish this task, is the following:
 \begin{itemize}
 	\item Sort the peer list by X coordinate of the public-key.
 	\item Seed a PNRG with a public seed (i.e., the current epoch) and generate a sequence of unique numbers from 0 to the size of the list.
@@ -497,30 +494,30 @@ A Bootstrap node could collude with a peer to particularly craft the order peer 
 \end{itemize}
 
 \subsection{Multiple BN registration per peer}
-An important factor for this protocol is that peers need to be registered with multiple Bootstrap nodes. This is because there has to be at least a path which links all the bootstrap node networks into a single one. Otherwise, peers would be able to exchange only the information inside a single bootstrap network which is only a subset of the whole network. \\ 
+An important factor for this protocol is that peers need to be registered with multiple Bootstrap nodes. This is because there has to be at least a path which links all the Bootstrap node sub-networks into a single one. Otherwise, peers would be able to exchange only the information inside a single bootstrap network, or inside a subset of the entire network. \\
 Obviously, this comes with a trade-off: the more registration a peer has, the more trades he has to do meaning that he will use more bandwidth and resources.
 
 \subsection{Fair exchange problem}
-The reason why a Bootstrap node has to give the secret key for encrypting the briefcase together with the token is that a malicious peer could create some fake updates identifiers to perform a BAL exchange, wait for the partner KEY message and then fake a crash or timeout. Using this strategy, one of the peers receives the updates; meanwhile, the other would not be able to decrypt the BRIEFCASE, which contains garbage data. This problem can be reduced to the fair exchange problem, which is actually impossible to solve without a trusted third party\citep{pagnia1999impossibility}. In our case, the BN node acts as a TTP. If a peer does not receive the KEY message, he can send an MPoM (Maybe-Proof-of-Misbehavior) with the encrypted briefcase. The bootstrap node will decrypt the BRIEFCASE message, check the validity of the updates, and if the updates are legit, send back the key to the peer. Otherwise, it will ban the peer's partner.
+The reason why a Bootstrap node has to give the secret key for encrypting the briefcase together with the token is that a malicious peer could create some fake updates identifiers to perform a BAL exchange, wait for the partner KEY message and then fake a crash or timeout. Using this strategy, one of the peers receives the updates; meanwhile, the other would not be able to decrypt the BRIEFCASE, which contains garbage data. This problem can be reduced to the fair exchange problem, which is actually impossible to solve without a trusted third party\citep{pagnia1999impossibility}. In our case, the Bootstrap nodes act as a TTP. If a peer does not receive the KEY message, he can send an MPoM (Maybe-Proof-of-Misbehavior) with the encrypted briefcase. The bootstrap node will decrypt the BRIEFCASE message, checks the validity of the updates, and if the updates are legit, sends back the key to the peer. Otherwise, it will ban the peer's partner.
 
 \subsection{PoM rewards}
-As sending PoM is resource expensive for peers, we need to incentivize this behavior. A possible solution is the following: since bootstrap nodes are linked to Validators which are block producers, we can incentivize this behavior by giving priority of receiving the new blocks to those peers that send valid PoMs or MPoMs.
+As sending PoM is resource expensive for peers, we need to incentivize this behaviour. A possible solution is the following: since bootstrap nodes are linked to Validators which are block producers, they can give priority of receiving the new blocks to those peers that send valid PoMs or MPoMs.
 
 \section{Optimizations}
 There are several ways to improve the performance of the protocol, but the ones with the most gains are the following two.
 
 \subsection{History exchange}
-One of the most resource-consuming messages is the HISTORYDIVULGE, as the partner has to provide a list containing a list of hash identifiers. This scale linearly with the number of updates. \\
-The more straightforward way to decrease the size of the list would be to encoded the identifiers with a smaller format and to reduce the number of identifiers. This is archivable by:
+One of the most resource-consuming messages is the HISTORYDIVULGE, as the partner has to provide a list of hash identifiers, one for each information he knows. This scale linearly with the number of updates. \\
+The more straightforward way to decrease the size of the list is to encoded the identifiers with a smaller format and to reduce the number of identifiers. This is archivable by:
 \begin{itemize}
 	\item Using a hash function with a smaller output such as RIPEMD-160.
-	\item Heuristically chose a subset of updates
+	\item Heuristically chose a subset of updates.
 \end{itemize}
 A more sophisticated way to accomplish this task is to encode the updates into a more efficient data structure such as an Invertible Bloom Lookup Table\citep{goodrich2011invertible} or a Set Sketch\citep{cryptoeprint:2003:235}.  \\
 Those kind of data structure are very efficient for set reconciliation tasks as they are able to encode data (in our case the identifiers) in a bloom filter fashion but with the added features that it is possible to recover the whole set of encoded data, and it is possible to perform the subtraction between two of them.
 
 \subsection{Message header}
-The message header takes a non-trivial amount of bytes in each message. It is possible for each peer to send just the first message with the full header.\\ Meanwhile, the following messages could contain just a hash of it.
+The message header takes a non-trivial amount of bytes in each message. It is possible for each peer to send just the first message with the full header, while the following messages could contain just a hash of it.
 
 \chapter{Evaluation}
 \section{Simulation vs Prototype}
@@ -535,8 +532,8 @@ We setup the prototype and simulator with the same parameters:
                                  & \textbf{Value} & \textbf{Description}                                                  \\ \hline
 \textbf{Bootstrap nodes}         & 3              & The number of BNs in the simulation                                   \\ \hline
 \textbf{Full nodes}              & 25            & Total number of FN in the simulation. They are ALTRUISTIC by default. \\ \hline
-\textbf{Rational nodes}          & 10       & Percentage of rational nodes                                          \\ \hline
-\textbf{Byzantine nodes}         & 5       & Percentage of byzantine nodes                                         \\ \hline
+\textbf{Rational nodes}          & 10       & Number of rational nodes                                          \\ \hline
+\textbf{Byzantine nodes}         & 5       & Number of byzantine nodes                                         \\ \hline
 \textbf{Epochs}                  & 40            & Number of epochs                                                      \\ \hline
 \textbf{PoW Difficulty}          & 3              & Difficulty expressed as number of epochs                              \\ \hline
 \textbf{Byzantine level}         & 0.3            & Probability for a byzantine node to act byzantine during an exchange  \\ \hline
@@ -612,8 +609,8 @@ Due to some limitation in the prototype implementation and as most of the action
    \end{minipage}
 \end{figure}
 
-Most of the metrics in the figures above, show very similar data. Our prototype has a little slower convergence rate and exchange per epoch but this is probably due to small known implementation issues. \\
-Still, looking at the plots gives us a high confidence that the simulation can faithfully match a real environment.
+Most of the metrics in the figures above, show very similar data. Our prototype has a little slower convergence rate and trades per epoch but this is probably due to small known implementation issues. \\
+Still, looking at the plots gives us a high confidence that the simulation can faithfully reproduce a real environment.
 
 \chapter{Experiments}
 In this chapter we are going to test the protocol under different assumptions. The parameters taken into account are the following:
@@ -626,8 +623,8 @@ In this chapter we are going to test the protocol under different assumptions. T
                                  & \textbf{Value} & \textbf{Description}                                                  \\ \hline
 \textbf{Bootstrap nodes}         & 8              & The number of BNs in the simulation                                   \\ \hline
 \textbf{Full nodes}              & 250            & Total number of FN in the simulation. They are ALTRUISTIC by default. \\ \hline
-\textbf{Rational nodes}          & Variable       & Percentage of rational nodes                                          \\ \hline
-\textbf{Byzantine nodes}         & Variable       & Percentage of byzantine nodes                                         \\ \hline
+\textbf{Rational nodes}          & Variable       & Number of rational nodes                                          \\ \hline
+\textbf{Byzantine nodes}         & Variable       & Number of byzantine nodes                                         \\ \hline
 \textbf{Epochs}                  & 200            & Number of epochs                                                      \\ \hline
 \textbf{PoW Difficulty}          & 3              & Difficulty expressed as number of epochs                              \\ \hline
 \textbf{Byzantine level}         & 0.4            & Probability for a byzantine node to act byzantine during an exchange  \\ \hline
@@ -641,19 +638,18 @@ In this chapter we are going to test the protocol under different assumptions. T
 \label{tab:simulation-paramters}
 \end{table}
 
-The main goal of these experiments is to see how the protocol behaves under different model such as presence of rational or byzantine or both. We analyze the simulation looking at different factors such as convergence rate, number of duplicate packets, type of exchange, etc. \\
-In the end we will also take into consideration some edge cases and see how much the system is resilient against disruption.
+The main goal of these experiments is to see how the protocol behaves under different assumptions such as presence of rational nodes or byzantine nodes, or both. We analyze the simulation looking at different factors such as convergence rate, number of duplicate packets, type of exchange, etc. \\
 
 \section{Setup}
 In the following sections, we will three general simulation in order to see how much the presence of rational and byzantine nodes afflict the system. \\
-The parameters of the tree simulation are the following:
+The parameters of the simulations are the following:
 
 \begin{table}[H]
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{|l|l|l|l|}
 \hline
-                                 & \textbf{Simulation One} & \textbf{Simulation two} & \textbf{Simulation 3} \\ \hline
+                                 & \textbf{Simulation One} & \textbf{Simulation Two} & \textbf{Simulation Three} \\ \hline
 \textbf{Rational nodes}          & 0                       & 100                     & 100                   \\ \hline
 \textbf{Byzantine nodes}         & 0                       & 0                       & 50                    \\ \hline
 \textbf{Number of subscriptions} & 2                       & 2                       & 2                     \\ \hline
@@ -663,20 +659,20 @@ The parameters of the tree simulation are the following:
 \label{tab:simulation-parameters-two}
 \end{table}
 
-The maximum mempoool size is 129 and the minimum is 6.
-Moreover, important factors in the simulation are the connectivity between bootstrap nodes and the number and distribution of node by their nature.
+The maximum mempoool size is 129 and the minimum is 6. \\
+Other important factors in the simulations are the connectivity between Bootstrap nodes and the number/distribution of Full nodes by their nature.
 
 \begin{figure}[!htb]
    \begin{minipage}{0.48\textwidth}
      \centering
      \includegraphics[width=\linewidth]{images/1/1-peer-nature-per-bn.png}
-     \caption{First simulation peer distribution and nature}
+     \caption{1st simulation peer distribution and nature}
      \label{fig:sim-one-init-distribution}
    \end{minipage}\hfill
    \begin{minipage}{0.48\textwidth}
      \centering
      \includegraphics[width=\linewidth]{images/2/two-peer-nature-per-bn.png}
-     \caption{Second simulation peer distribution and nature}
+     \caption{2nd simulation peer distribution and nature}
      \label{fig:sim-two-init-distribution}
    \end{minipage}
 \end{figure}
@@ -684,11 +680,11 @@ Moreover, important factors in the simulation are the connectivity between boots
 \begin{figure}[H]
   \centering
   \includegraphics[width=7cm]{images/3/3-peer-nature-per-bn.png}
-  \caption{Third simulation peer distribution and nature}
+  \caption{3rd simulation peer distribution and nature}
   \label{fig:sim-three-init-distribution}
 \end{figure}
 
-As we can see from figure \ref{fig:sim-one-init-distribution}, \ref{fig:sim-two-init-distribution} and \ref{fig:sim-three-init-distribution}, each bootstrap node has more or less the same number of peer and, in the second and first simulation also the distribution of rational and byzantine actors is even. \\
+As we can see from figure \ref{fig:sim-one-init-distribution}, \ref{fig:sim-two-init-distribution} and \ref{fig:sim-three-init-distribution}, each bootstrap node has more or less the same number of peer and, in the second and third simulation, also the distribution of rational and byzantine actors is even. \\
 
 \begin{figure}[H]
   \centering
@@ -700,7 +696,7 @@ As we can see from figure \ref{fig:sim-one-init-distribution}, \ref{fig:sim-two-
 Moreover, from figure \ref{fig:connectivity-general}, we can also see that each bootstrap node has a connection with all the other bootstrap node meaning that the network is fully connected. This is a needed condition in order for the protocol to work. 
 \newpage
 \section{Convergences rate}
-The first propriety we want to analyze is the converge rate. 
+The first propriety we want to analyze is the convergence rate. 
 
 \begin{figure}[!htb]
    \begin{minipage}{0.49\textwidth}
@@ -726,7 +722,7 @@ The first propriety we want to analyze is the converge rate.
 
 
 As we can see from figures \ref{fig:sim-one-conv} and \ref{fig:sim-two-conv}, the presence of rational nodes does not affect the convergence rate at all until the last 20 epochs. This sounds reasonable as peer's mempool are going to be more full and OPT messages help peers get the last missing updates if they don't have anything to share. Since rational nodes don't accept OPT exchanges, full network convergence is more difficult to reach. \\
-The situation change n figure \ref{fig:sim-three-conv}, when byzantine actors are introduced. In the last figure we can clearly see that more peers are having a hard time receiving updates and in 200 epochs are not enough to reach the same level of convergence of the previous situations. Still, even if more peers are having troubles, most of them (as shown in the distribution of bars) have a mempool size above the mean. 
+The situation change in figure \ref{fig:sim-three-conv}, when byzantine actors are introduced. In fact, we can clearly see that more peers are having a hard time receiving updates and that 200 epochs are not enough to reach the same level of convergence of the previous situations. Still, even if more peers are having troubles, most of them have a mempool size above the mean. 
 \section{Duplicates}
 As we want to avoid wasting resources, an important metrics is the number of duplicates updates received.
 
@@ -734,13 +730,13 @@ As we want to avoid wasting resources, an important metrics is the number of dup
    \begin{minipage}{0.49\textwidth}
      \centering
      \includegraphics[width=\linewidth]{images/1/1-duplicates.png}
-  	\caption{1st simulation duplicates updates}
+  	\caption{1st simulation duplicate updates}
   	\label{fig:sim-one-duplicates}
    \end{minipage}\hfill
    \begin{minipage}{0.49\textwidth}
      \centering
      \includegraphics[width=\linewidth]{images/2/two-duplicates.png}
-       \caption{2nd simulation duplicates updates}
+       \caption{2nd simulation duplicate updates}
  		\label{fig:sim-two-duplicates}
    \end{minipage}
 \end{figure}
@@ -748,16 +744,16 @@ As we want to avoid wasting resources, an important metrics is the number of dup
 \begin{figure}[H]
   \centering
   \includegraphics[width=7cm]{images/3/3-duplicates.png}
-  \caption{3rd simulation duplicates updates}
+  \caption{3rd simulation duplicate updates}
   \label{fig:sim-three-duplicates}
 \end{figure}
 
 As we can see from figures \ref{fig:sim-one-duplicates}, \ref{fig:sim-two-duplicates}, and \ref{fig:sim-three-duplicates} the number of duplicates updates tends to be higher in the final steps of the simulations. This is because mempools are becoming fuller and so, since peers exchange updates concurrently, there is higher probability to receive a duplicate. \\
 Moreover, as more byzantine and rational peer are introduces in the network, number of duplicates mean also decrease. This is because less exchange are made as rational peers don't accept OPT messages and byzantine have a probability of invalidating the exchange. \\
-Still, even if the mean in the last figure is lower than in the other two, we have to remember that the third simulation wasn't able to reach full network convergence.
+Still, even if the mean in the last figure is lower than in the other two, we have to remember that the third simulation isn't able to reach full network convergence.
 
 \section{Exchange types}
-Another crucial metrics is the percentage of BAL exchange versus OPT and ABORT. Since we want to incentivise peers to execute, as much as possible, the tic-for-tac trade we need to see if our simulations support this requirements.
+Another crucial metrics is the percentage of BAL exchange versus OPT and ABORT. Since we want to incentivise peers to execute, as much as possible, the Tic-For-Tac trade we need to see if our simulations support this requirements.
 
 \begin{figure}[!htb]
    \begin{minipage}{0.49\textwidth}
@@ -810,7 +806,7 @@ The last interesting metric is the number of non-aborted exchange done in each e
   \label{fig:sim-three-numbers}
 \end{figure}
 
-We can instantly see that the presence of byzantine peers decrease exchange number mean in the last figure \ref{fig:sim-three-numbers}. Instead, in the the first two plots \ref{fig:sim-two-numbers} \ref{fig:sim-one-numbers}, the only difference is the steepness of the tail. This is due to the presence of rational nodes who don't want to accept OPT trades which are mostly present in the last epochs. 
+We can instantly see that the presence of byzantine peers decrease exchange number mean in the last figure \ref{fig:sim-three-numbers}. Instead, in the the first two plots \ref{fig:sim-two-numbers} \ref{fig:sim-one-numbers}, the only difference is the steepness of the tail. This is due to the presence of rational nodes who don't want to accept OPT trades which are mostly present in the last epochs, meaning that more trades are needed to reach converence.
 
 \section{Insights}
 \subsection{Connectivity}
@@ -853,11 +849,11 @@ We also want to point out that the a higher convergence rate could be archived b
 
 \chapter{Conclusion}
 Let us now summarize the report and draw the final conclusion. \\
-We started the first chapter by introducing where are gossip protocols used why they important, with a focus on blockchain systems. \\
-In the second chapter, we started a discussion on the background needed to understand the major challenges of this work, introducing the concepts of, blockchain, gossip protocols and BAR game theory model. \\
- We then moved to the third chapter, where we described in details how BBAR Gossip work, from the description of the environment and network until the message exchanges. \\
+We started the first chapter by introducing what are gossip protocols, where are used and why they important, with a focus on blockchain systems. \\
+In the second chapter, we started a discussion on the background needed to understand the major challenges of this work, introducing the concepts of blockchain, gossip protocols and BAR game theory model. \\
+ We then moved to the third chapter, where we described in details how BBAR Gossip work, from the description of the network and environment until the message exchanges. \\
 In the next two chapters we first evaluated our simulator using a prototype and then we used the simulator to better understand how our protocol behaves. From the test we have plotted several metrics which gave us some very interesting insights. \\
-In conclusion, we have been able to provide a gossip protocol for blockchains under that BAR model assumption adopting techniques derived from BAR Gossip.
+In conclusion, we have been able to provide a gossip protocol for blockchains considering the BAR model assumption and adopting techniques derived from BAR Gossip.
 \section{Future works}
 Many improvements can be made to improve both the performance and reliability of BBAR Gossip. As we already described, sharing the entire history with the partner is a very resource wasting task and needs to be optimized by either share only a subset or by using some better, more suited data structures. \\
 Moreover, other improvements discussed in subsequent researches of BAR Gossip, such as erasure code as done in Flighpath\citep{li2008flightpath}, could be used to generally improve the system.
